@@ -164,11 +164,23 @@ function Header({
                                 {item.merchant}
                               </p>
                             ) : (
-                              item.salePrice && (
-                                <p className="mt-1 text-sm font-bold text-primary">
-                                  {item.salePrice.toLocaleString("nb-NO")} kr
-                                </p>
-                              )
+                              <div className="mt-1 flex items-baseline gap-1.5">
+                                {item.discount > 0 && item.price && (
+                                  <span className="text-xs text-muted-foreground line-through">
+                                    {item.price.toLocaleString("nb-NO")} kr
+                                  </span>
+                                )}
+                                {item.salePrice && (
+                                  <span
+                                    className={cn(
+                                      "text-sm font-bold",
+                                      item.discount > 0 ? "text-destructive" : "text-primary"
+                                    )}
+                                  >
+                                    {item.salePrice.toLocaleString("nb-NO")} kr
+                                  </span>
+                                )}
+                              </div>
                             )}
                           </div>
                         </div>
