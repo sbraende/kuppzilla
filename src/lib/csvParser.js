@@ -1,4 +1,5 @@
 import Papa from 'papaparse';
+import categoryMapping from '@/data/categoryMapping.json';
 
 /**
  * Removes single quotes from field names and values
@@ -39,6 +40,10 @@ function mapRowToProduct(row) {
   const price = parsePrice(row["'price'"]);
   const salePrice = parsePrice(row["'sale_price'"]);
   const discount = calculateDiscount(price, salePrice);
+  const productType = cleanValue(row["'product_type'"]);
+
+  // Map product type to broader categories
+  const categories = categoryMapping[productType] || ['Andre'];
 
   return {
     id: cleanValue(row["'id'"]),
@@ -51,7 +56,8 @@ function mapRowToProduct(row) {
     salePrice,
     discount,
     availability: cleanValue(row["'availability'"]),
-    productType: cleanValue(row["'product_type'"]),
+    productType,
+    categories, // Array of broader category names
     // Additional fields that might be useful
     mpn: cleanValue(row["'mpn'"]),
     gtin: cleanValue(row["'gtin'"]),

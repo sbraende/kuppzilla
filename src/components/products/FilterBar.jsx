@@ -1,31 +1,26 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 
-const filters = [
-  { id: "best-deals", label: "Beste tilbud" },
-  { id: "for-me", label: "For meg" },
-  { id: "most-popular", label: "Mest populære" },
-  { id: "newest", label: "Nyeste" },
-  { id: "electronics", label: "Elektronikk" },
-  { id: "home", label: "Hjem & interiør" },
-  { id: "fashion", label: "Mote & klær" },
-  { id: "sports", label: "Sport & fritid" },
-  { id: "beauty", label: "Skjønnhet & helse" },
-  { id: "books", label: "Bøker & medier" },
-  { id: "toys", label: "Leker & barn" },
-  { id: "food", label: "Mat & drikke" },
-  { id: "garden", label: "Hage & utendørs" },
-  { id: "tools", label: "Verktøy & bygg" },
-  { id: "automotive", label: "Bil & motor" },
-  { id: "pets", label: "Kjæledyr" },
-  { id: "office", label: "Kontor & skole" },
-  { id: "music", label: "Musikk & instrumenter" },
-  { id: "gaming", label: "Gaming & konsoll" },
-  { id: "travel", label: "Reise & bagasje" },
-  { id: "art", label: "Kunst & håndverk" },
+// Special filters that are not category-based
+const specialFilters = [
+  { id: "best-deals", label: "Beste tilbud", type: "special" },
+  { id: "for-me", label: "For meg", type: "special" },
+  { id: "most-popular", label: "Mest populære", type: "special" },
+  { id: "newest", label: "Nyeste", type: "special" },
 ];
 
-function FilterBar({ activeFilter = "best-deals", onFilterChange }) {
+function FilterBar({ activeFilter = "best-deals", onFilterChange, availableCategories = [] }) {
+  // Combine special filters with dynamic category filters
+  const filters = useMemo(() => {
+    const categoryFilters = availableCategories.map(category => ({
+      id: `category-${category}`,
+      label: category,
+      type: "category",
+      categoryName: category,
+    }));
+
+    return [...specialFilters, ...categoryFilters];
+  }, [availableCategories]);
   const scrollRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);

@@ -1,4 +1,4 @@
-import { ScrollText, Heart, X } from "lucide-react";
+import { ScrollText, Heart, X, Search } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -7,19 +7,22 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
 
-function Header({ wishlist = [], onRemoveFromWishlist }) {
+function Header({ wishlist = [], onRemoveFromWishlist, searchQuery = "", onSearchChange }) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background">
-      <div className="container mx-auto flex items-center justify-between px-4 py-4">
-        {/* Left spacer for centering */}
-        <div className="w-10"></div>
+      <div className="container mx-auto px-4 py-4">
+        {/* Top row: Title and Wishlist */}
+        <div className="flex items-center justify-between">
+          {/* Left spacer for centering */}
+          <div className="w-10"></div>
 
-        {/* Centered title */}
-        <h1 className="text-2xl font-bold tracking-wider">KUPPZILLA</h1>
+          {/* Centered title */}
+          <h1 className="text-2xl font-bold tracking-wider">KUPPZILLA</h1>
 
-        {/* Right side with sheet trigger */}
-        <Sheet>
+          {/* Right side with sheet trigger */}
+          <Sheet>
           <SheetTrigger asChild>
             <button
               className="relative rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
@@ -89,6 +92,21 @@ function Header({ wishlist = [], onRemoveFromWishlist }) {
             </div>
           </SheetContent>
         </Sheet>
+        </div>
+
+        {/* Search input below title */}
+        <div className="mt-4 flex justify-center">
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        </div>
       </div>
     </header>
   );

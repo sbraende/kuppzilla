@@ -1,7 +1,8 @@
 import Masonry from "react-masonry-css";
 import ProductCard from "@/components/products/ProductCard";
+import DealCard from "@/components/deals/DealCard";
 
-function ProductGrid({ products, onSaveProduct, savedProductIds }) {
+function ProductGrid({ items, onSaveProduct, savedProductIds }) {
   const breakpointColumns = {
     default: 4,
     1280: 4,
@@ -16,13 +17,21 @@ function ProductGrid({ products, onSaveProduct, savedProductIds }) {
       className="flex w-auto gap-4"
       columnClassName="bg-clip-padding"
     >
-      {products.map((product) => (
-        <div key={product.id} className="mb-4">
-          <ProductCard
-            product={product}
-            onSave={onSaveProduct}
-            isSaved={savedProductIds.includes(product.id)}
-          />
+      {items.map((item) => (
+        <div key={item.id} className="mb-4">
+          {item.type === 'deal' ? (
+            <DealCard
+              deal={item}
+              onSave={onSaveProduct}
+              isSaved={savedProductIds.includes(item.id)}
+            />
+          ) : (
+            <ProductCard
+              product={item}
+              onSave={onSaveProduct}
+              isSaved={savedProductIds.includes(item.id)}
+            />
+          )}
         </div>
       ))}
     </Masonry>
