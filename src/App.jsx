@@ -1,8 +1,8 @@
 import { useState } from "react";
-import Header from "@/components/Header";
-import FilterBar from "@/components/FilterBar";
-import ProductGrid from "@/components/ProductGrid";
-import Footer from "@/components/Footer";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import FilterBar from "@/components/products/FilterBar";
+import ProductGrid from "@/components/products/ProductGrid";
 
 // Mock product data with varying image heights for masonry effect
 const mockProducts = [

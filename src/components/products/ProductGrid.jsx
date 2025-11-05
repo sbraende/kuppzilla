@@ -1,5 +1,5 @@
 import Masonry from "react-masonry-css";
-import ProductCard from "@/components/ProductCard";
+import ProductCard from "@/components/products/ProductCard";
 
 function ProductGrid({ products, onSaveProduct, savedProductIds }) {
   const breakpointColumns = {
