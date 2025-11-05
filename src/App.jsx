@@ -10,6 +10,7 @@ import deals from "@/data/deals";
 function App() {
   const { products, loading, error } = useProducts();
   const [wishlist, setWishlist] = useState([]);
+  const [notificationIds, setNotificationIds] = useState([]);
   const [activeFilter, setActiveFilter] = useState("best-deals");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
@@ -21,6 +22,15 @@ function App() {
         return prev.filter((item) => item.id !== product.id);
       }
       return [...prev, product];
+    });
+  };
+
+  const handleToggleNotification = (productId) => {
+    setNotificationIds((prev) => {
+      if (prev.includes(productId)) {
+        return prev.filter((id) => id !== productId);
+      }
+      return [...prev, productId];
     });
   };
 
@@ -183,6 +193,8 @@ function App() {
       <Header
         wishlist={wishlist}
         onRemoveFromWishlist={handleSaveProduct}
+        notificationIds={notificationIds}
+        onToggleNotification={handleToggleNotification}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />

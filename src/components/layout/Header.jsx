@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ScrollText, Heart, X, Search } from "lucide-react";
+import { ScrollText, Heart, X, Search, Bell, BellOff } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 function Header({
   wishlist = [],
   onRemoveFromWishlist,
+  notificationIds = [],
+  onToggleNotification,
   searchQuery = "",
   onSearchChange,
 }) {
@@ -115,20 +117,22 @@ function Header({
                     </p>
                   ) : (
                     filteredWishlist.map((item) => (
-                      <a
+                      <div
                         key={item.id}
-                        href={item.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className={cn(
-                          "relative flex gap-3 rounded-lg border p-3 transition-all hover:shadow-md",
+                          "flex gap-3 rounded-lg border p-3 transition-all hover:shadow-md",
                           item.type === "deal"
                             ? "border-yellow-500/20 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 hover:border-yellow-500/40"
                             : "border-border bg-card hover:bg-accent/50"
                         )}
                       >
-                        {/* Product/Deal Image */}
-                        <div className="relative shrink-0">
+                        {/* Product/Deal Image - Clickable */}
+                        <a
+                          href={item.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="relative shrink-0"
+                        >
                           <img
                             src={item.image}
                             alt={item.title}
@@ -146,10 +150,15 @@ function Header({
                               -{item.discount}%
                             </div>
                           )}
-                        </div>
+                        </a>
 
-                        {/* Product/Deal Info */}
-                        <div className="flex flex-1 flex-col justify-between">
+                        {/* Product/Deal Info - Clickable */}
+                        <a
+                          href={item.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex flex-1 flex-col justify-between min-w-0"
+                        >
                           <div>
                             <h3 className="font-semibold text-sm line-clamp-2">
                               {item.title}
@@ -174,7 +183,9 @@ function Header({
                                   <span
                                     className={cn(
                                       "text-sm font-bold",
-                                      item.discount > 0 ? "text-destructive" : "text-primary"
+                                      item.discount > 0
+                                        ? "text-destructive"
+                                        : "text-primary"
                                     )}
                                   >
                                     {item.salePrice.toLocaleString("nb-NO")} kr
@@ -183,21 +194,52 @@ function Header({
                               </div>
                             )}
                           </div>
-                        </div>
+                        </a>
 
-                        {/* Remove Button */}
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            onRemoveFromWishlist(item);
-                          }}
-                          className="relative z-10 self-start rounded-sm p-1 opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring"
-                          aria-label="Fjern fra favoritter"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </a>
+                        {/* Action Buttons */}
+                        <div className="flex gap-1 shrink-0 self-start">
+                          {/* Notification Bell Button - Only for products */}
+                          {item.type !== "deal" && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onToggleNotification(item.id);
+                              }}
+                              className={cn(
+                                "rounded-sm p-1 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring",
+                                notificationIds.includes(item.id)
+                                  ? "text-primary opacity-100"
+                                  : "opacity-70 hover:opacity-100"
+                              )}
+                              aria-label={
+                                notificationIds.includes(item.id)
+                                  ? "Skru av prisvarsling"
+                                  : "Skru på prisvarsling"
+                              }
+                            >
+                              {notificationIds.includes(item.id) ? (
+                                <Bell className="h-4 w-4 fill-current" />
+                              ) : (
+                                <BellOff className="h-4 w-4" />
+                              )}
+                            </button>
+                          )}
+
+                          {/* Remove Button */}
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              onRemoveFromWishlist(item);
+                            }}
+                            className="rounded-sm p-1 opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring"
+                            aria-label="Fjern fra favoritter"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
                     ))
                   )}
                 </div>
