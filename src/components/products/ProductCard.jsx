@@ -51,7 +51,7 @@ function ProductCard({ product, onSave, isSaved }) {
               ? "bg-primary text-primary-foreground"
               : "bg-background/90 text-foreground hover:bg-background"
           )}
-          aria-label={isSaved ? "Remove from wishlist" : "Add to wishlist"}
+          aria-label={isSaved ? "Fjern fra favoritter" : "Legg til i favoritter"}
         >
           <Heart className={cn("h-5 w-5", isSaved && "fill-current")} />
         </button>

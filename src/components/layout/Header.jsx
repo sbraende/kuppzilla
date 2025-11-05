@@ -41,7 +41,7 @@ function Header({
             <SheetTrigger asChild>
               <button
                 className="relative rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                aria-label="Open wishlist"
+                aria-label="Åpne favoritter"
               >
                 <ScrollText className="h-6 w-6" />
                 {wishlist.length > 0 && (
@@ -56,7 +56,7 @@ function Header({
                 <SheetTitle>
                   <div className="flex items-center gap-3">
                     <Heart className="h-6 w-6" />
-                    <span className="text-xl">Ønskeliste</span>
+                    <span className="text-xl">Favoritter</span>
                   </div>
                 </SheetTitle>
               </SheetHeader>
@@ -107,11 +107,11 @@ function Header({
                     <p className="py-8 text-center text-sm text-muted-foreground">
                       Ingen{" "}
                       {wishlistFilter === "deals"
-                        ? "deals"
+                        ? "kupp"
                         : wishlistFilter === "products"
                         ? "produkter"
-                        : "varer"}{" "}
-                      i ønskelisten
+                        : "favoritter"}{" "}
+                      lagret
                     </p>
                   ) : (
                     filteredWishlist.map((item) => (
@@ -193,7 +193,7 @@ function Header({
                             onRemoveFromWishlist(item);
                           }}
                           className="relative z-10 self-start rounded-sm p-1 opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring"
-                          aria-label="Fjern fra ønskeliste"
+                          aria-label="Fjern fra favoritter"
                         >
                           <X className="h-4 w-4" />
                         </button>
