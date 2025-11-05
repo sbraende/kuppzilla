@@ -59,30 +59,28 @@ function FilterBar({ activeFilter = "best-deals", onFilterChange, availableCateg
     <div className="sticky top-[73px] z-40 w-full bg-background">
       <div
         ref={scrollRef}
-        className="overflow-x-auto scrollbar-hide cursor-grab"
+        className="overflow-x-auto scrollbar-hide cursor-grab px-4"
         onMouseDown={handleMouseDown}
         onMouseLeave={handleMouseLeave}
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
       >
-        <div className="container mx-auto">
-          <div className="flex gap-2 px-4 py-4">
-            {filters.map((filter) => (
-              <button
-                key={filter.id}
-                onClick={() => onFilterChange(filter.id)}
-                className={cn(
-                  "whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all",
-                  "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background",
-                  activeFilter === filter.id
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                )}
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
+        <div className="flex gap-2 py-4">
+          {filters.map((filter) => (
+            <button
+              key={filter.id}
+              onClick={() => onFilterChange(filter.id)}
+              className={cn(
+                "whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all",
+                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background",
+                activeFilter === filter.id
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              )}
+            >
+              {filter.label}
+            </button>
+          ))}
         </div>
       </div>
     </div>
