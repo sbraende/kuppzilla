@@ -2,6 +2,7 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import FilterBar from "@/components/FilterBar";
 import ProductGrid from "@/components/ProductGrid";
+import Footer from "@/components/Footer";
 
 // Mock product data with varying image heights for masonry effect
 const mockProducts = [
@@ -90,6 +91,7 @@ function App() {
           savedProductIds={savedProductIds}
         />
       </main>
+      <Footer />
     </>
   );
 }
