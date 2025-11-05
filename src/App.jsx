@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useDebounce } from "use-debounce";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -9,14 +9,28 @@ import deals from "@/data/deals";
 
 function App() {
   const { products, loading, error } = useProducts();
-  const [wishlist, setWishlist] = useState([]);
-  const [notificationIds, setNotificationIds] = useState([]);
+  const [favoritesList, setFavoritesList] = useState(() => {
+    const saved = localStorage.getItem("favoritesList");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [notificationIds, setNotificationIds] = useState(() => {
+    const saved = localStorage.getItem("notificationIds");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [activeFilter, setActiveFilter] = useState("best-deals");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
 
+  useEffect(() => {
+    localStorage.setItem("favoritesList", JSON.stringify(favoritesList));
+  }, [favoritesList]);
+
+  useEffect(() => {
+    localStorage.setItem("notificationIds", JSON.stringify(notificationIds));
+  }, [notificationIds]);
+
   const handleSaveProduct = (product) => {
-    setWishlist((prev) => {
+    setFavoritesList((prev) => {
       const isAlreadySaved = prev.some((item) => item.id === product.id);
       if (isAlreadySaved) {
         return prev.filter((item) => item.id !== product.id);
@@ -34,7 +48,7 @@ function App() {
     });
   };
 
-  const savedProductIds = wishlist.map((product) => product.id);
+  const savedProductIds = favoritesList.map((product) => product.id);
 
   // Extract available categories from products
   const availableCategories = useMemo(() => {
@@ -191,8 +205,8 @@ function App() {
   return (
     <>
       <Header
-        wishlist={wishlist}
-        onRemoveFromWishlist={handleSaveProduct}
+        favoritesList={favoritesList}
+        onRemoveFromFavorites={handleSaveProduct}
         notificationIds={notificationIds}
         onToggleNotification={handleToggleNotification}
         searchQuery={searchQuery}

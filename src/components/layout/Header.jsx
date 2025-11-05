@@ -11,20 +11,20 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 function Header({
-  wishlist = [],
-  onRemoveFromWishlist,
+  favoritesList = [],
+  onRemoveFromFavorites,
   notificationIds = [],
   onToggleNotification,
   searchQuery = "",
   onSearchChange,
 }) {
-  const [wishlistFilter, setWishlistFilter] = useState("all");
+  const [favoritesFilter, setFavoritesFilter] = useState("all");
 
-  // Filter wishlist items based on selected filter
-  const filteredWishlist = wishlist.filter((item) => {
-    if (wishlistFilter === "all") return true;
-    if (wishlistFilter === "deals") return item.type === "deal";
-    if (wishlistFilter === "products") return item.type !== "deal";
+  // Filter favorites items based on selected filter
+  const filteredFavorites = favoritesList.filter((item) => {
+    if (favoritesFilter === "all") return true;
+    if (favoritesFilter === "deals") return item.type === "deal";
+    if (favoritesFilter === "products") return item.type !== "deal";
     return true;
   });
   return (
@@ -46,9 +46,9 @@ function Header({
                 aria-label="Åpne favoritter"
               >
                 <ScrollText className="h-6 w-6" />
-                {wishlist.length > 0 && (
+                {favoritesList.length > 0 && (
                   <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                    {wishlist.length}
+                    {favoritesList.length}
                   </span>
                 )}
               </button>
@@ -66,57 +66,57 @@ function Header({
               {/* Filter Tabs */}
               <div className="flex gap-2 border-b border-border px-4 pb-3">
                 <button
-                  onClick={() => setWishlistFilter("all")}
+                  onClick={() => setFavoritesFilter("all")}
                   className={cn(
                     "rounded-full px-4 py-1.5 text-sm font-medium transition-all",
-                    wishlistFilter === "all"
+                    favoritesFilter === "all"
                       ? "bg-primary text-primary-foreground"
                       : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
                   )}
                 >
-                  Alle ({wishlist.length})
+                  Alle ({favoritesList.length})
                 </button>
                 <button
-                  onClick={() => setWishlistFilter("deals")}
+                  onClick={() => setFavoritesFilter("deals")}
                   className={cn(
                     "rounded-full px-4 py-1.5 text-sm font-medium transition-all",
-                    wishlistFilter === "deals"
+                    favoritesFilter === "deals"
                       ? "bg-primary text-primary-foreground"
                       : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
                   )}
                 >
-                  Kupp ({wishlist.filter((item) => item.type === "deal").length}
+                  Kupp ({favoritesList.filter((item) => item.type === "deal").length}
                   )
                 </button>
                 <button
-                  onClick={() => setWishlistFilter("products")}
+                  onClick={() => setFavoritesFilter("products")}
                   className={cn(
                     "rounded-full px-4 py-1.5 text-sm font-medium transition-all",
-                    wishlistFilter === "products"
+                    favoritesFilter === "products"
                       ? "bg-primary text-primary-foreground"
                       : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
                   )}
                 >
                   Produkter (
-                  {wishlist.filter((item) => item.type !== "deal").length})
+                  {favoritesList.filter((item) => item.type !== "deal").length})
                 </button>
               </div>
 
-              {/* Wishlist Items - Scrollable */}
+              {/* Favorites Items - Scrollable */}
               <div className="mt-4 flex-1 overflow-y-auto px-4">
                 <div className="space-y-3 pb-4">
-                  {filteredWishlist.length === 0 ? (
+                  {filteredFavorites.length === 0 ? (
                     <p className="py-8 text-center text-sm text-muted-foreground">
                       Ingen{" "}
-                      {wishlistFilter === "deals"
+                      {favoritesFilter === "deals"
                         ? "kupp"
-                        : wishlistFilter === "products"
+                        : favoritesFilter === "products"
                         ? "produkter"
                         : "favoritter"}{" "}
                       lagret
                     </p>
                   ) : (
-                    filteredWishlist.map((item) => (
+                    filteredFavorites.map((item) => (
                       <div
                         key={item.id}
                         className={cn(
@@ -231,7 +231,7 @@ function Header({
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              onRemoveFromWishlist(item);
+                              onRemoveFromFavorites(item);
                             }}
                             className="rounded-sm p-1 opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring"
                             aria-label="Fjern fra favoritter"
