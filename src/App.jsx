@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Header from "@/components/Header";
+import FilterBar from "@/components/FilterBar";
 import ProductGrid from "@/components/ProductGrid";
 
 // Mock product data with varying image heights for masonry effect
@@ -64,6 +65,7 @@ const mockProducts = [
 
 function App() {
   const [wishlist, setWishlist] = useState([]);
+  const [activeFilter, setActiveFilter] = useState("best-deals");
 
   const handleSaveProduct = (product) => {
     setWishlist((prev) => {
@@ -80,6 +82,7 @@ function App() {
   return (
     <>
       <Header wishlist={wishlist} onRemoveFromWishlist={handleSaveProduct} />
+      <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} />
       <main className="container mx-auto px-4 py-8">
         <ProductGrid
           products={mockProducts}
