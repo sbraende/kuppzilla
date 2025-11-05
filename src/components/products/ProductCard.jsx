@@ -30,7 +30,7 @@ function ProductCard({ product, onSave, isSaved }) {
         )}
         {!product.image && (
           <div className="flex h-48 w-full items-center justify-center bg-muted text-muted-foreground">
-            No Image
+            Ingen bilde
           </div>
         )}
 
