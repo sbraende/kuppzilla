@@ -1,11 +1,8 @@
-import { useEffect, useRef } from "react";
 import Masonry from "react-masonry-css";
 import ProductCard from "@/components/products/ProductCard";
 import DealCard from "@/components/deals/DealCard";
 
 function ProductGrid({ items, onSaveProduct, savedProductIds, onLoadMore, hasMore, loadingMore }) {
-  const observerTarget = useRef(null);
-
   const breakpointColumns = {
     default: 4,
     1280: 4,
@@ -14,33 +11,11 @@ function ProductGrid({ items, onSaveProduct, savedProductIds, onLoadMore, hasMor
     640: 2,
   };
 
-  // Infinite scroll with Intersection Observer
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore && onLoadMore) {
-          onLoadMore();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
-    }
-
-    return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
-      }
-    };
-  }, [hasMore, loadingMore, onLoadMore]);
-
   return (
     <>
       <Masonry
         breakpointCols={breakpointColumns}
-        className="flex w-auto gap-4"
+        className="flex w-auto gap-2 sm:gap-4"
         columnClassName="bg-clip-padding"
       >
         {items.map((item) => (
@@ -62,18 +37,26 @@ function ProductGrid({ items, onSaveProduct, savedProductIds, onLoadMore, hasMor
         ))}
       </Masonry>
 
-      {/* Infinite scroll trigger */}
-      <div ref={observerTarget} className="py-8">
+      {/* Load More Button */}
+      <div className="py-8 flex items-center justify-center">
         {loadingMore && (
-          <div className="flex items-center justify-center">
-            <div className="text-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Laster flere tilbud...
-              </p>
-            </div>
+          <div className="text-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Laster flere tilbud...
+            </p>
           </div>
         )}
+
+        {!loadingMore && hasMore && (
+          <button
+            onClick={onLoadMore}
+            className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+          >
+            Last inn 50 flere tilbud
+          </button>
+        )}
+
         {!hasMore && items.length > 0 && (
           <p className="text-center text-sm text-muted-foreground">
             Ingen flere tilbud å vise

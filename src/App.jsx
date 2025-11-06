@@ -83,7 +83,8 @@ function App() {
   // Filter, mix, and sort products with deals
   const filteredItems = useMemo(() => {
     let filteredProducts = [...products];
-    let filteredDeals = [...deals];
+    // TEMPORARILY DISABLED: Deals mixing (keeping code for later)
+    // let filteredDeals = [...deals];
 
     // Apply search query to products
     if (debouncedSearchQuery.trim()) {
@@ -96,38 +97,34 @@ function App() {
         );
       });
 
-      // Apply search query to deals
-      filteredDeals = filteredDeals.filter((deal) => {
-        return (
-          deal.title.toLowerCase().includes(query) ||
-          deal.description.toLowerCase().includes(query) ||
-          deal.merchant.toLowerCase().includes(query) ||
-          deal.keywords.some((kw) => kw.toLowerCase().includes(query))
-        );
-      });
+      // TEMPORARILY DISABLED: Apply search query to deals
+      // filteredDeals = filteredDeals.filter((deal) => {
+      //   return (
+      //     deal.title.toLowerCase().includes(query) ||
+      //     deal.description.toLowerCase().includes(query) ||
+      //     deal.merchant.toLowerCase().includes(query) ||
+      //     deal.keywords.some((kw) => kw.toLowerCase().includes(query))
+      //   );
+      // });
     }
 
-    // Calculate relevancy scores for deals
-    const dealsWithRelevancy = filteredDeals
-      .map((deal) => ({
-        ...deal,
-        relevancyScore: calculateDealRelevancy(deal, debouncedSearchQuery),
-      }))
-      .filter((deal) => deal.relevancyScore > 0);
+    // TEMPORARILY DISABLED: Calculate relevancy scores for deals
+    // const dealsWithRelevancy = filteredDeals
+    //   .map((deal) => ({
+    //     ...deal,
+    //     relevancyScore: calculateDealRelevancy(deal, debouncedSearchQuery),
+    //   }))
+    //   .filter((deal) => deal.relevancyScore > 0);
 
-    // Mix deals with products (products already have type: 'product')
-    const mixed = [...filteredProducts, ...dealsWithRelevancy];
+    // TEMPORARILY DISABLED: Mix deals with products
+    // const mixed = [...filteredProducts, ...dealsWithRelevancy];
+    const mixed = [...filteredProducts];
 
-    // Sort by savings (for products) or relevancy (for deals)
-    mixed.sort((a, b) => {
-      if (a.type === "deal" && b.type === "deal") {
-        return b.relevancyScore - a.relevancyScore;
-      }
-      if (a.type === "deal") return b.relevancyScore - (a.savings || a.discount || 0);
-      if (b.type === "deal") return (b.savings || b.discount || 0) - a.relevancyScore;
-      // Both products: sort by savings first, then discount
-      return (b.savings || b.discount || 0) - (a.savings || a.discount || 0);
-    });
+    // SORTING DISABLED: Products are displayed in the order they're loaded from the database
+    // to allow proper pagination without reordering
+    // mixed.sort((a, b) => {
+    //   return (b.savings || b.discount || 0) - (a.savings || a.discount || 0);
+    // });
 
     return mixed;
   }, [products, debouncedSearchQuery]);

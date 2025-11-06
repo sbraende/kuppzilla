@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
 const ITEMS_PER_PAGE = 50;
@@ -10,15 +10,27 @@ export function useOffers() {
   const [error, setError] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
+  const isFetchingRef = useRef(false);
+  const hasFetchedInitialRef = useRef(false);
 
   // Fetch best offers from Supabase
-  const fetchOffers = useCallback(async (currentOffset = 0, append = false) => {
+  const fetchOffers = async (currentOffset = 0, append = false) => {
+    // Prevent duplicate fetches
+    if (isFetchingRef.current) {
+      console.log('Fetch already in progress, skipping...');
+      return;
+    }
+
+    isFetchingRef.current = true;
+
     try {
       if (append) {
         setLoadingMore(true);
       } else {
         setLoading(true);
       }
+
+      console.log(`Fetching offers with offset: ${currentOffset}, append: ${append}`);
 
       // Query products on sale that beat prices at other stores
       const { data, error: queryError } = await supabase.rpc('get_best_offers', {
@@ -42,27 +54,34 @@ export function useOffers() {
         }
 
         setHasMore(fallbackData.data.length === ITEMS_PER_PAGE);
+        console.log(`Loaded ${mappedProducts.length} products, hasMore: ${fallbackData.data.length === ITEMS_PER_PAGE}`);
         return;
       }
 
       const mappedProducts = mapOffersToProducts(data);
 
       if (append) {
-        setProducts(prev => [...prev, ...mappedProducts]);
+        setProducts(prev => {
+          console.log(`Appending ${mappedProducts.length} products to existing ${prev.length}`);
+          return [...prev, ...mappedProducts];
+        });
       } else {
         setProducts(mappedProducts);
       }
 
-      setHasMore(data && data.length === ITEMS_PER_PAGE);
+      const hasMoreData = data && data.length === ITEMS_PER_PAGE;
+      setHasMore(hasMoreData);
       setError(null);
+      console.log(`Loaded ${mappedProducts.length} products, hasMore: ${hasMoreData}`);
     } catch (err) {
       console.error("Error fetching offers:", err);
       setError(err.message);
     } finally {
       setLoading(false);
       setLoadingMore(false);
+      isFetchingRef.current = false;
     }
-  }, []);
+  };
 
   // Fallback query using direct view access
   async function fetchOffersWithFallback(currentOffset) {
@@ -74,7 +93,6 @@ export function useOffers() {
       .gt('sale_price', 0)
       .eq('availability', 'in_stock')
       .gt('discount_percentage', 10)
-      .order('discount_percentage', { ascending: false })
       .range(currentOffset, currentOffset + ITEMS_PER_PAGE - 1);
 
     if (onSaleError) {
@@ -136,23 +154,30 @@ export function useOffers() {
       // Extra fields for "best offer" display
       savings: parseFloat(offer.savings || 0),
       savingsPercentage: parseFloat(offer.savings_percentage || 0),
-      minOtherStorePrice: parseFloat(offer.min_other_store_price || offer.min_other_price || 0)
+      minOtherStorePrice: parseFloat(offer.min_other_store_price || offer.min_other_price || 0),
+      isBestOffer: offer.is_best_offer || false  // NEW: flag to show "Best Offer" badge
     }));
   }
 
   // Load more function for infinite scroll
   const loadMore = useCallback(() => {
+    console.log('loadMore called', { loadingMore, hasMore, offset });
     if (!loadingMore && hasMore) {
       const newOffset = offset + ITEMS_PER_PAGE;
+      console.log(`Setting new offset: ${newOffset}`);
       setOffset(newOffset);
       fetchOffers(newOffset, true);
     }
-  }, [offset, loadingMore, hasMore, fetchOffers]);
+  }, [offset, loadingMore, hasMore]);
 
   // Initial fetch
   useEffect(() => {
-    fetchOffers(0, false);
-  }, [fetchOffers]);
+    if (!hasFetchedInitialRef.current) {
+      console.log('Initial fetch triggered');
+      hasFetchedInitialRef.current = true;
+      fetchOffers(0, false);
+    }
+  }, []);
 
   return {
     products,
