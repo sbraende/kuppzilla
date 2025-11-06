@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 
 const ITEMS_PER_PAGE = 50;
 
-export function useOffers() {
+export function useOffers(searchQuery = '') {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -12,9 +12,10 @@ export function useOffers() {
   const [offset, setOffset] = useState(0);
   const isFetchingRef = useRef(false);
   const hasFetchedInitialRef = useRef(false);
+  const previousSearchRef = useRef('');
 
   // Fetch best offers from Supabase
-  const fetchOffers = async (currentOffset = 0, append = false) => {
+  const fetchOffers = async (currentOffset = 0, append = false, search = '') => {
     // Prevent duplicate fetches
     if (isFetchingRef.current) {
       console.log('Fetch already in progress, skipping...');
@@ -30,12 +31,13 @@ export function useOffers() {
         setLoading(true);
       }
 
-      console.log(`Fetching offers with offset: ${currentOffset}, append: ${append}`);
+      console.log(`Fetching offers with offset: ${currentOffset}, append: ${append}, search: "${search}"`);
 
       // Query products on sale that beat prices at other stores
       const { data, error: queryError } = await supabase.rpc('get_best_offers', {
         p_limit: ITEMS_PER_PAGE,
-        p_offset: currentOffset
+        p_offset: currentOffset,
+        p_search_query: search || null
       });
 
       if (queryError) {
@@ -166,18 +168,36 @@ export function useOffers() {
       const newOffset = offset + ITEMS_PER_PAGE;
       console.log(`Setting new offset: ${newOffset}`);
       setOffset(newOffset);
-      fetchOffers(newOffset, true);
+      fetchOffers(newOffset, true, searchQuery);
     }
-  }, [offset, loadingMore, hasMore]);
+  }, [offset, loadingMore, hasMore, searchQuery]);
 
   // Initial fetch
   useEffect(() => {
     if (!hasFetchedInitialRef.current) {
       console.log('Initial fetch triggered');
       hasFetchedInitialRef.current = true;
-      fetchOffers(0, false);
+      fetchOffers(0, false, searchQuery);
     }
   }, []);
+
+  // Handle search query changes
+  useEffect(() => {
+    // Skip if this is the initial mount (already handled by initial fetch)
+    if (!hasFetchedInitialRef.current) {
+      return;
+    }
+
+    // Check if search query actually changed
+    if (previousSearchRef.current !== searchQuery) {
+      console.log(`Search query changed from "${previousSearchRef.current}" to "${searchQuery}"`);
+      previousSearchRef.current = searchQuery;
+
+      // Reset pagination and fetch new results
+      setOffset(0);
+      fetchOffers(0, false, searchQuery);
+    }
+  }, [searchQuery]);
 
   return {
     products,

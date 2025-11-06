@@ -7,7 +7,6 @@ import { useOffers } from "@/hooks/useOffers";
 import deals from "@/data/deals";
 
 function App() {
-  const { products, loading, error, hasMore, loadMore, loadingMore } = useOffers();
   const [favoritesList, setFavoritesList] = useState(() => {
     const saved = localStorage.getItem("favoritesList");
     return saved ? JSON.parse(saved) : [];
@@ -18,6 +17,9 @@ function App() {
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
+
+  // Pass debounced search query to useOffers for server-side filtering
+  const { products, loading, error, hasMore, loadMore, loadingMore } = useOffers(debouncedSearchQuery);
 
   useEffect(() => {
     localStorage.setItem("favoritesList", JSON.stringify(favoritesList));
@@ -80,54 +82,13 @@ function App() {
     return score;
   };
 
-  // Filter, mix, and sort products with deals
+  // Products are already filtered server-side via useOffers hook
+  // No need for client-side filtering anymore
   const filteredItems = useMemo(() => {
-    let filteredProducts = [...products];
-    // TEMPORARILY DISABLED: Deals mixing (keeping code for later)
-    // let filteredDeals = [...deals];
-
-    // Apply search query to products
-    if (debouncedSearchQuery.trim()) {
-      const query = debouncedSearchQuery.toLowerCase();
-      filteredProducts = filteredProducts.filter((product) => {
-        return (
-          product.title?.toLowerCase().includes(query) ||
-          product.brand?.toLowerCase().includes(query) ||
-          product.description?.toLowerCase().includes(query)
-        );
-      });
-
-      // TEMPORARILY DISABLED: Apply search query to deals
-      // filteredDeals = filteredDeals.filter((deal) => {
-      //   return (
-      //     deal.title.toLowerCase().includes(query) ||
-      //     deal.description.toLowerCase().includes(query) ||
-      //     deal.merchant.toLowerCase().includes(query) ||
-      //     deal.keywords.some((kw) => kw.toLowerCase().includes(query))
-      //   );
-      // });
-    }
-
-    // TEMPORARILY DISABLED: Calculate relevancy scores for deals
-    // const dealsWithRelevancy = filteredDeals
-    //   .map((deal) => ({
-    //     ...deal,
-    //     relevancyScore: calculateDealRelevancy(deal, debouncedSearchQuery),
-    //   }))
-    //   .filter((deal) => deal.relevancyScore > 0);
-
-    // TEMPORARILY DISABLED: Mix deals with products
-    // const mixed = [...filteredProducts, ...dealsWithRelevancy];
-    const mixed = [...filteredProducts];
-
-    // SORTING DISABLED: Products are displayed in the order they're loaded from the database
-    // to allow proper pagination without reordering
-    // mixed.sort((a, b) => {
-    //   return (b.savings || b.discount || 0) - (a.savings || a.discount || 0);
-    // });
-
-    return mixed;
-  }, [products, debouncedSearchQuery]);
+    // Server-side search and sorting already applied
+    // Just return products as-is
+    return products;
+  }, [products]);
 
   return (
     <>
