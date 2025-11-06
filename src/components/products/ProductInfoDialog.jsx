@@ -6,15 +6,24 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
+import { AIBadge } from "@/components/ui/ai-badge";
 import { useProductStores } from "@/hooks/useProductStores";
 import { useProductQA } from "@/hooks/useProductQA";
-import { MessageCircle, Store, ExternalLink, Loader2 } from "lucide-react";
+import { useProductSummary } from "@/hooks/useProductSummary";
+import { MessageCircle, Store, ExternalLink, Loader2, Sparkles } from "lucide-react";
 
 function ProductInfoDialog({ product, open, onOpenChange, children }) {
   const [question, setQuestion] = useState("");
   const { stores, loading: storesLoading } = useProductStores(product?.productId);
   const { answer, loading: qaLoading, error: qaError, askQuestion, clearAnswer } = useProductQA();
+  const { summary, loading: summaryLoading } = useProductSummary(product);
 
   const handleAskQuestion = (e) => {
     e.preventDefault();
@@ -55,22 +64,48 @@ function ProductInfoDialog({ product, open, onOpenChange, children }) {
           </div>
         </DialogHeader>
 
-        {/* Description Section */}
-        {product?.description && (
-          <div className="py-4 border-t">
-            <h3 className="font-semibold mb-2">Beskrivelse</h3>
-            <DialogDescription className="text-base leading-relaxed">
-              {product.description}
-            </DialogDescription>
+        {/* AI Summary Section */}
+        <div className="py-4 border-t">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="h-5 w-5 text-purple-500" />
+            <h3 className="font-semibold">Produktsammendrag</h3>
+            <AIBadge />
           </div>
-        )}
+          {summaryLoading ? (
+            <div className="flex items-center gap-2 py-2">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Genererer sammendrag...</p>
+            </div>
+          ) : (
+            <DialogDescription className="text-base leading-relaxed">
+              {summary || product?.description || "Ingen beskrivelse tilgjengelig"}
+            </DialogDescription>
+          )}
+
+          {/* Original Description in Accordion */}
+          {product?.description && (
+            <Accordion type="single" collapsible className="mt-4">
+              <AccordionItem value="original-description">
+                <AccordionTrigger className="text-sm">
+                  Se original beskrivelse
+                </AccordionTrigger>
+                <AccordionContent>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {product.description}
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          )}
+        </div>
 
         {/* AI Q&A Section */}
         <div className="py-4 border-t">
-          <h3 className="font-semibold mb-3 flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-3">
             <MessageCircle className="h-5 w-5" />
-            Spør om produktet
-          </h3>
+            <h3 className="font-semibold">Spør om produktet</h3>
+            <AIBadge />
+          </div>
           <form onSubmit={handleAskQuestion} className="space-y-3">
             <div className="flex gap-2">
               <Input

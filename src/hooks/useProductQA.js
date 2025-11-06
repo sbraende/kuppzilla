@@ -51,6 +51,7 @@ export function useProductQA() {
               discount: productData.discount,
               merchant: productData.merchant,
               availability: productData.availability,
+              gtin: productData.gtin,
             },
             question: question.trim(),
           }),

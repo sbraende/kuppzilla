@@ -236,6 +236,7 @@ export function useOffers(searchQuery = "") {
       availability: offer.availability || "",
       categories: [], // Can be populated if needed
       productType: "",
+      gtin: offer.gtin || "", // Global Trade Item Number for enhanced AI context
       // Extra fields for "best offer" display
       savings: parseFloat(offer.savings || 0),
       savingsPercentage: parseFloat(offer.savings_percentage || 0),

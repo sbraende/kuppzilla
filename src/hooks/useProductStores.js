@@ -28,7 +28,7 @@ export function useProductStores(productId) {
         const { data, error: queryError } = await supabase
           .from("products_with_stores")
           .select(
-            "store_name, price, sale_price, effective_price, discount_percentage, availability, link"
+            "store_name, price, sale_price, effective_price, discount_percentage, availability, link, gtin"
           )
           .eq("product_id", productId)
           .gt("effective_price", 0) // Only include stores with valid prices

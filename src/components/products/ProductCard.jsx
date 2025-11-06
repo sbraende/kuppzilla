@@ -52,20 +52,6 @@ function ProductCard({ product, onSave, isSaved }) {
           </div>
         )}
 
-        {/* Info Button - Top Left (below discount or in place) */}
-        <button
-          onClick={handleInfoClick}
-          className={cn(
-            "absolute rounded-full p-2 shadow-lg transition-all",
-            "hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-            "bg-background/90 text-foreground hover:bg-background",
-            hasDiscount ? "left-2 top-14" : "left-2 top-2"
-          )}
-          aria-label="Produktinformasjon"
-        >
-          <Info className="h-5 w-5" />
-        </button>
-
         {/* Save Button - Top Right */}
         <button
           onClick={handleSaveClick}
@@ -79,6 +65,19 @@ function ProductCard({ product, onSave, isSaved }) {
           aria-label={isSaved ? "Fjern fra favoritter" : "Legg til i favoritter"}
         >
           <Heart className={cn("h-5 w-5", isSaved && "fill-current")} />
+        </button>
+
+        {/* Info Button - Below Save Button (Top Right) */}
+        <button
+          onClick={handleInfoClick}
+          className={cn(
+            "absolute right-2 top-14 rounded-full p-2 shadow-lg transition-all",
+            "hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+            "bg-background/90 text-foreground hover:bg-background"
+          )}
+          aria-label="Produktinformasjon"
+        >
+          <Info className="h-5 w-5" />
         </button>
       </div>
 

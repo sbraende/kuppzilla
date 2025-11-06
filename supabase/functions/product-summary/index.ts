@@ -23,11 +23,11 @@ serve(async (req) => {
       throw new Error("OPENAI_API_KEY environment variable is not set");
     }
 
-    const { productData, question } = await req.json();
+    const { productData } = await req.json();
 
-    if (!productData || !question) {
+    if (!productData) {
       return new Response(
-        JSON.stringify({ error: "Product data and question are required" }),
+        JSON.stringify({ error: "Product data is required" }),
         {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -35,7 +35,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Answering question about product: ${productData.title}`);
+    console.log(`Generating AI summary for product: ${productData.title}`);
 
     // Prepare context about the product
     let productContext = `
@@ -48,13 +48,13 @@ Butikk: ${productData.merchant}
 ${productData.availability ? `Tilgjengelighet: ${productData.availability}` : ""}
     `.trim();
 
-    // Add GTIN if available for better context
+    // If GTIN is available, fetch additional product information from ChatGPT
     if (productData.gtin) {
       productContext += `\nGTIN: ${productData.gtin}`;
-      productContext += "\n\nBruk din kunnskap om produkter med dette GTIN-nummeret for å gi mer detaljerte svar.";
+      productContext += "\n\nVennligst inkluder relevant informasjon om produktet basert på GTIN hvis mulig.";
     }
 
-    // Call OpenAI Chat API
+    // Call OpenAI Chat API to generate human-readable summary
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -66,15 +66,15 @@ ${productData.availability ? `Tilgjengelighet: ${productData.availability}` : ""
         messages: [
           {
             role: "system",
-            content: "Du er en hjelpsom produktekspert som svarer på spørsmål om produkter. Gi korte, nøyaktige svar på norsk basert på produktinformasjonen som er gitt. Hvis du ikke har nok informasjon til å svare, si det tydelig. Hold svarene under 3-4 setninger."
+            content: "Du er en hjelpsom produktekspert. Skriv et kort, menneske-lesbart sammendrag av produktet på norsk (2-3 setninger). Fokuser på nøkkelfunksjoner, fordeler og hvem produktet passer for. Vær konsis og lettlest. Hvis GTIN er oppgitt, bruk din kunnskap om produkter med dette GTIN-nummeret til å gi mer detaljert informasjon."
           },
           {
             role: "user",
-            content: `${productContext}\n\nSpørsmål: ${question}`
+            content: productContext
           }
         ],
         temperature: 0.7,
-        max_tokens: 200
+        max_tokens: 150
       }),
     });
 
@@ -84,14 +84,13 @@ ${productData.availability ? `Tilgjengelighet: ${productData.availability}` : ""
     }
 
     const data = await response.json();
-    const answer = data.choices[0]?.message?.content || "";
+    const summary = data.choices[0]?.message?.content || "";
 
-    console.log(`Generated answer: ${answer.substring(0, 100)}...`);
+    console.log(`Generated summary: ${summary.substring(0, 100)}...`);
 
     return new Response(
       JSON.stringify({
-        question,
-        answer,
+        summary,
         product: productData.title,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
