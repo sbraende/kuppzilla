@@ -186,79 +186,67 @@ function ProductInfoDialog({ product, open, onOpenChange, children }) {
                 const hasDiscount = store.discount_percentage > 0;
 
                 return (
-                  <div
+                  <a
                     key={`${store.store_name}-${index}`}
-                    className={`p-3 sm:p-4 rounded-lg border transition-colors ${
+                    href={store.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`block p-3 rounded-lg border transition-all relative ${
                       isCurrentStore
                         ? "border-primary bg-primary/5"
                         : isCheapest
                         ? "border-green-500 bg-green-500/5"
-                        : "border-border hover:border-muted-foreground"
+                        : "border-border hover:border-muted-foreground hover:bg-muted/30"
                     }`}
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        {/* Store name and badges */}
-                        <div className="flex items-center gap-2 flex-wrap mb-2">
-                          <p className="font-medium text-sm sm:text-base">
-                            {store.store_name}
-                          </p>
-                          {isCurrentStore && (
-                            <span className="text-xs px-2 py-0.5 bg-primary text-primary-foreground rounded whitespace-nowrap">
-                              Valgt butikk
-                            </span>
-                          )}
-                          {isCheapest && !isCurrentStore && (
-                            <span className="text-xs px-2 py-0.5 bg-green-500 text-white rounded whitespace-nowrap">
-                              Billigst
-                            </span>
-                          )}
-                        </div>
+                    {/* External Link Icon - Top Right */}
+                    <ExternalLink className="absolute top-2 right-2 h-4 w-4 text-muted-foreground" />
 
-                        {/* Price section */}
-                        <div className="flex items-baseline gap-2 flex-wrap">
-                          {hasDiscount ? (
-                            <>
-                              <span className="text-lg sm:text-xl font-bold text-foreground">
-                                {store.sale_price} kr
-                              </span>
-                              <span className="text-sm text-muted-foreground line-through">
-                                {store.price} kr
-                              </span>
-                              <span className="text-xs px-1.5 py-0.5 bg-destructive text-destructive-foreground rounded whitespace-nowrap">
-                                -{store.discount_percentage.toFixed(0)}%
-                              </span>
-                            </>
-                          ) : (
-                            <span className="text-lg sm:text-xl font-bold text-foreground">
-                              {store.effective_price} kr
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Availability */}
-                        {store.availability && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {store.availability}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Button - full width on mobile, auto on desktop */}
-                      {store.link && (
-                        <a
-                          href={store.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full sm:w-auto px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors flex items-center justify-center gap-2 text-sm font-medium whitespace-nowrap"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          Gå til butikk
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
+                    {/* Store name and badges */}
+                    <div className="flex items-center gap-2 flex-wrap mb-1.5 pr-6">
+                      <p className="font-medium text-sm">
+                        {store.store_name}
+                      </p>
+                      {isCurrentStore && (
+                        <span className="text-xs px-1.5 py-0.5 bg-primary text-primary-foreground rounded whitespace-nowrap">
+                          Valgt butikk
+                        </span>
+                      )}
+                      {isCheapest && !isCurrentStore && (
+                        <span className="text-xs px-1.5 py-0.5 bg-green-500 text-white rounded whitespace-nowrap">
+                          Billigst
+                        </span>
                       )}
                     </div>
-                  </div>
+
+                    {/* Price section - more compact */}
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      {hasDiscount ? (
+                        <>
+                          <span className="text-lg font-bold text-foreground">
+                            {store.sale_price} kr
+                          </span>
+                          <span className="text-sm text-muted-foreground line-through">
+                            {store.price} kr
+                          </span>
+                          <span className="text-xs px-1.5 py-0.5 bg-destructive text-destructive-foreground rounded whitespace-nowrap">
+                            -{store.discount_percentage.toFixed(0)}%
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-lg font-bold text-foreground">
+                          {store.effective_price} kr
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Availability - more subtle */}
+                    {store.availability && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {store.availability}
+                      </p>
+                    )}
+                  </a>
                 );
               })}
             </div>
