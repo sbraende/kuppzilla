@@ -5,7 +5,7 @@ const ITEMS_PER_PAGE = 50;
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_KEY;
 
-export function useOffers(searchQuery = "", useSemanticSearch = false) {
+export function useOffers(searchQuery = "") {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -15,7 +15,6 @@ export function useOffers(searchQuery = "", useSemanticSearch = false) {
   const isFetchingRef = useRef(false);
   const hasFetchedInitialRef = useRef(false);
   const previousSearchRef = useRef("");
-  const previousSearchModeRef = useRef(false);
 
   // Perform semantic search via Edge Function
   const performSemanticSearch = async (query) => {
@@ -50,8 +49,7 @@ export function useOffers(searchQuery = "", useSemanticSearch = false) {
   const fetchOffers = async (
     currentOffset = 0,
     append = false,
-    search = "",
-    semantic = false
+    search = ""
   ) => {
     // Prevent duplicate fetches
     if (isFetchingRef.current) {
@@ -69,11 +67,11 @@ export function useOffers(searchQuery = "", useSemanticSearch = false) {
       }
 
       console.log(
-        `Fetching offers with offset: ${currentOffset}, append: ${append}, search: "${search}", semantic: ${semantic}`
+        `Fetching offers with offset: ${currentOffset}, append: ${append}, search: "${search}"`
       );
 
-      // Use semantic search if enabled and there's a search query
-      if (semantic && search && search.trim().length > 0) {
+      // Always try semantic search first if there's a search query
+      if (search && search.trim().length > 0) {
         // Semantic search doesn't support pagination in the same way
         // Only fetch on initial load, not for "load more"
         if (currentOffset > 0) {
@@ -85,18 +83,24 @@ export function useOffers(searchQuery = "", useSemanticSearch = false) {
           return;
         }
 
-        const semanticResults = await performSemanticSearch(search);
-        const mappedProducts = mapOffersToProducts(semanticResults);
+        try {
+          console.log("Attempting semantic search...");
+          const semanticResults = await performSemanticSearch(search);
+          const mappedProducts = mapOffersToProducts(semanticResults);
 
-        setProducts(mappedProducts);
-        setHasMore(false); // Semantic search returns all results at once
-        setError(null);
-        console.log(`Loaded ${mappedProducts.length} products via semantic search`);
+          setProducts(mappedProducts);
+          setHasMore(false); // Semantic search returns all results at once
+          setError(null);
+          console.log(`Loaded ${mappedProducts.length} products via semantic search`);
 
-        setLoading(false);
-        setLoadingMore(false);
-        isFetchingRef.current = false;
-        return;
+          setLoading(false);
+          setLoadingMore(false);
+          isFetchingRef.current = false;
+          return;
+        } catch (semanticError) {
+          console.warn("Semantic search failed, falling back to regular search:", semanticError);
+          // Continue to regular search below
+        }
       }
 
       // Query products on sale that beat prices at other stores
@@ -250,42 +254,40 @@ export function useOffers(searchQuery = "", useSemanticSearch = false) {
       const newOffset = offset + ITEMS_PER_PAGE;
       console.log(`Setting new offset: ${newOffset}`);
       setOffset(newOffset);
-      fetchOffers(newOffset, true, searchQuery, useSemanticSearch);
+      fetchOffers(newOffset, true, searchQuery);
     }
-  }, [offset, loadingMore, hasMore, searchQuery, useSemanticSearch]);
+  }, [offset, loadingMore, hasMore, searchQuery]);
 
   // Initial fetch
   useEffect(() => {
     if (!hasFetchedInitialRef.current) {
       console.log("Initial fetch triggered");
       hasFetchedInitialRef.current = true;
-      fetchOffers(0, false, searchQuery, useSemanticSearch);
+      fetchOffers(0, false, searchQuery);
     }
   }, []);
 
-  // Handle search query or search mode changes
+  // Handle search query changes
   useEffect(() => {
     // Skip if this is the initial mount (already handled by initial fetch)
     if (!hasFetchedInitialRef.current) {
       return;
     }
 
-    // Check if search query or search mode actually changed
+    // Check if search query actually changed
     const searchChanged = previousSearchRef.current !== searchQuery;
-    const modeChanged = previousSearchModeRef.current !== useSemanticSearch;
 
-    if (searchChanged || modeChanged) {
+    if (searchChanged) {
       console.log(
-        `Search changed from "${previousSearchRef.current}" to "${searchQuery}", mode: ${previousSearchModeRef.current} -> ${useSemanticSearch}`
+        `Search changed from "${previousSearchRef.current}" to "${searchQuery}"`
       );
       previousSearchRef.current = searchQuery;
-      previousSearchModeRef.current = useSemanticSearch;
 
       // Reset pagination and fetch new results
       setOffset(0);
-      fetchOffers(0, false, searchQuery, useSemanticSearch);
+      fetchOffers(0, false, searchQuery);
     }
-  }, [searchQuery, useSemanticSearch]);
+  }, [searchQuery]);
 
   return {
     products,

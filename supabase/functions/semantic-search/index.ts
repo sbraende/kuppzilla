@@ -10,32 +10,32 @@ const corsHeaders = {
 
 // Helper function to generate embeddings using OpenAI
 async function generateEmbedding(text: string): Promise<number[]> {
-  const openaiKey = Deno.env.get('OPENAI_API_KEY')
+  const openaiKey = Deno.env.get("OPENAI_API_KEY");
 
   if (!openaiKey) {
-    throw new Error('OPENAI_API_KEY environment variable is not set')
+    throw new Error("OPENAI_API_KEY environment variable is not set");
   }
 
-  const response = await fetch('https://api.openai.com/v1/embeddings', {
-    method: 'POST',
+  const response = await fetch("https://api.openai.com/v1/embeddings", {
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${openaiKey}`,
-      'Content-Type': 'application/json',
+      "Authorization": `Bearer ${openaiKey}`,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: 'text-embedding-3-small',
+      model: "text-embedding-3-small",
       input: text,
-      dimensions: 384 // Match database vector(384)
-    })
-  })
+      dimensions: 384, // Match database vector(384)
+    }),
+  });
 
   if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`OpenAI API error: ${response.status} ${error}`)
+    const error = await response.text();
+    throw new Error(`OpenAI API error: ${response.status} ${error}`);
   }
 
-  const data = await response.json()
-  return data.data[0].embedding
+  const data = await response.json();
+  return data.data[0].embedding;
 }
 
 serve(async (req) => {
@@ -96,10 +96,7 @@ serve(async (req) => {
       const { data: fullProducts, error: detailsError } = await supabase
         .from("products_with_stores")
         .select("*")
-        .in("product_id", productIds)
-        .not("sale_price", "is", null)
-        .gt("sale_price", 0)
-        .eq("availability", "in_stock");
+        .in("product_id", productIds);
 
       if (detailsError) {
         console.error("Details error:", detailsError);
@@ -108,7 +105,9 @@ serve(async (req) => {
 
       // Merge similarity scores with product details
       const productsWithScores = fullProducts?.map((product) => {
-        const match = products.find((p: any) => p.product_id === product.product_id);
+        const match = products.find((p: any) =>
+          p.product_id === product.product_id
+        );
         return {
           ...product,
           similarity: match?.similarity || 0,
@@ -118,7 +117,9 @@ serve(async (req) => {
       // Sort by similarity (highest first)
       productsWithScores?.sort((a, b) => b.similarity - a.similarity);
 
-      console.log(`Returning ${productsWithScores?.length || 0} products with details`);
+      console.log(
+        `Returning ${productsWithScores?.length || 0} products with details`,
+      );
 
       return new Response(
         JSON.stringify({

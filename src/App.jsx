@@ -16,13 +16,11 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [searchQuery, setSearchQuery] = useState("");
-  const [useSemanticSearch, setUseSemanticSearch] = useState(false);
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
 
-  // Pass debounced search query and semantic search flag to useOffers
+  // Pass debounced search query to useOffers (semantic search is always used)
   const { products, loading, error, hasMore, loadMore, loadingMore } = useOffers(
-    debouncedSearchQuery,
-    useSemanticSearch
+    debouncedSearchQuery
   );
 
   useEffect(() => {
@@ -103,8 +101,6 @@ function App() {
         onToggleNotification={handleToggleNotification}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        useSemanticSearch={useSemanticSearch}
-        onSemanticSearchToggle={() => setUseSemanticSearch(!useSemanticSearch)}
       />
       <main className="container mx-auto px-4 py-8">
         {loading && (
