@@ -2,7 +2,7 @@ import Masonry from "react-masonry-css";
 import ProductCard from "@/components/products/ProductCard";
 import DealCard from "@/components/deals/DealCard";
 
-function ProductGrid({ items, onSaveProduct, savedProductIds, onLoadMore, hasMore, loadingMore }) {
+function ProductGrid({ items, onSaveProduct, savedProductIds, onLoadMore, hasMore, loadingMore, isSearchMode = false }) {
   const breakpointColumns = {
     default: 4,
     1280: 4,
@@ -59,7 +59,10 @@ function ProductGrid({ items, onSaveProduct, savedProductIds, onLoadMore, hasMor
 
         {!hasMore && items.length > 0 && (
           <p className="text-center text-sm text-muted-foreground">
-            Ingen flere tilbud å vise
+            {isSearchMode
+              ? "Fant du ikke det du lette etter? Prøv å endre søkeordet for bedre resultater."
+              : "Ingen flere tilbud å vise"
+            }
           </p>
         )}
       </div>

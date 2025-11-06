@@ -72,10 +72,9 @@ export function useOffers(searchQuery = "") {
 
       // Always try semantic search first if there's a search query
       if (search && search.trim().length > 0) {
-        // Semantic search doesn't support pagination in the same way
-        // Only fetch on initial load, not for "load more"
+        // SEARCH MODE: Max 50 results, no pagination
         if (currentOffset > 0) {
-          console.log("Semantic search doesn't support pagination, skipping");
+          console.log("Search mode: pagination disabled, maximum 50 results shown");
           setHasMore(false);
           setLoading(false);
           setLoadingMore(false);
@@ -84,14 +83,14 @@ export function useOffers(searchQuery = "") {
         }
 
         try {
-          console.log("Attempting semantic search...");
+          console.log("Search mode: attempting semantic search with combined scoring...");
           const semanticResults = await performSemanticSearch(search);
           const mappedProducts = mapOffersToProducts(semanticResults);
 
           setProducts(mappedProducts);
-          setHasMore(false); // Semantic search returns all results at once
+          setHasMore(false); // Search mode: no pagination, max 50 results
           setError(null);
-          console.log(`Loaded ${mappedProducts.length} products via semantic search`);
+          console.log(`Search mode: loaded ${mappedProducts.length} products (max 50)`);
 
           setLoading(false);
           setLoadingMore(false);

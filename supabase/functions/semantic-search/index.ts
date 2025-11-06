@@ -108,24 +108,43 @@ serve(async (req) => {
         const match = products.find((p: any) =>
           p.product_id === product.product_id
         );
+
+        // Calculate normalized discount score (0-1 range)
+        const discountScore = Math.min((product.discount_percentage || 0) / 100, 1);
+
+        // Combined score: 60% similarity + 40% discount
+        const similarity = match?.similarity || 0;
+        const combinedScore = (similarity * 0.6) + (discountScore * 0.4);
+
         return {
           ...product,
-          similarity: match?.similarity || 0,
+          similarity: similarity,
+          discount_score: discountScore,
+          combined_score: combinedScore,
         };
       });
 
-      // Sort by similarity (highest first)
-      productsWithScores?.sort((a, b) => b.similarity - a.similarity);
+      // Sort by combined score (highest first), then product_id (stable tiebreaker)
+      productsWithScores?.sort((a, b) => {
+        if (b.combined_score !== a.combined_score) {
+          return b.combined_score - a.combined_score;
+        }
+        // Stable tiebreaker
+        return a.product_id.localeCompare(b.product_id);
+      });
+
+      // Limit to 50 results for search mode
+      const limitedResults = productsWithScores?.slice(0, 50);
 
       console.log(
-        `Returning ${productsWithScores?.length || 0} products with details`,
+        `Returning ${limitedResults?.length || 0} products with combined scoring (max 50)`,
       );
 
       return new Response(
         JSON.stringify({
           query,
-          results: productsWithScores || [],
-          count: productsWithScores?.length || 0,
+          results: limitedResults || [],
+          count: limitedResults?.length || 0,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );

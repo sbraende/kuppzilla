@@ -66,6 +66,7 @@ function App() {
             onLoadMore={loadMore}
             hasMore={hasMore}
             loadingMore={loadingMore}
+            isSearchMode={debouncedSearchQuery.length > 0}
           />
         )}
 
