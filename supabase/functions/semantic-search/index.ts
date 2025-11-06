@@ -8,8 +8,35 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-// Initialize the AI model session once (reused across requests)
-const model = new Supabase.ai.Session("gte-small");
+// Helper function to generate embeddings using OpenAI
+async function generateEmbedding(text: string): Promise<number[]> {
+  const openaiKey = Deno.env.get('OPENAI_API_KEY')
+
+  if (!openaiKey) {
+    throw new Error('OPENAI_API_KEY environment variable is not set')
+  }
+
+  const response = await fetch('https://api.openai.com/v1/embeddings', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openaiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'text-embedding-3-small',
+      input: text,
+      dimensions: 384 // Match database vector(384)
+    })
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`OpenAI API error: ${response.status} ${error}`)
+  }
+
+  const data = await response.json()
+  return data.data[0].embedding
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -38,12 +65,9 @@ serve(async (req) => {
       );
     }
 
-    // Generate embedding using Supabase AI native API
+    // Generate embedding using OpenAI
     console.log(`Generating embedding for query: "${query}"`);
-    const embedding = await model.run(query, {
-      mean_pool: true,
-      normalize: true,
-    });
+    const embedding = await generateEmbedding(query);
 
     console.log(`Generated embedding with ${embedding.length} dimensions`);
 

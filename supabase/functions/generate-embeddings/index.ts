@@ -7,8 +7,35 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-// Initialize the AI model session once (reused across requests)
-const model = new Supabase.ai.Session('gte-small')
+// Helper function to generate embeddings using OpenAI
+async function generateEmbedding(text: string): Promise<number[]> {
+  const openaiKey = Deno.env.get('OPENAI_API_KEY')
+
+  if (!openaiKey) {
+    throw new Error('OPENAI_API_KEY environment variable is not set')
+  }
+
+  const response = await fetch('https://api.openai.com/v1/embeddings', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openaiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'text-embedding-3-small',
+      input: text,
+      dimensions: 384 // Match database vector(384)
+    })
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`OpenAI API error: ${response.status} ${error}`)
+  }
+
+  const data = await response.json()
+  return data.data[0].embedding
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -31,10 +58,7 @@ serve(async (req) => {
     // If this is a single query request (for semantic search)
     if (singleQuery && text) {
       console.log(`Generating embedding for single query: "${text}"`)
-      const embedding = await model.run(text, {
-        mean_pool: true,
-        normalize: true,
-      })
+      const embedding = await generateEmbedding(text)
 
       return new Response(
         JSON.stringify({ embedding }),
@@ -77,15 +101,12 @@ serve(async (req) => {
         product.brand
       ].filter(Boolean).join(' ')
 
-      // Generate embedding using Supabase AI
-      const embedding = await model.run(productText, {
-        mean_pool: true,
-        normalize: true,
-      })
+      // Generate embedding using OpenAI
+      const embedding = await generateEmbedding(productText)
 
       updates.push({
         id: product.id,
-        embedding: JSON.stringify(Array.from(embedding)),
+        embedding: embedding,
         embedding_generated_at: new Date().toISOString()
       })
     }
