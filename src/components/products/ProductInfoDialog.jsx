@@ -37,7 +37,7 @@ function ProductInfoDialog({ product, open, onOpenChange, children }) {
     askQuestion,
     clearAnswer,
   } = useProductQA();
-  const { summary, loading: summaryLoading } = useProductSummary(product);
+  const { summary, loading: summaryLoading } = useProductSummary(product, open);
 
   const handleAskQuestion = (e) => {
     e.preventDefault();

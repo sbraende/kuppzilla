@@ -6,14 +6,16 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_KEY;
 /**
  * Hook for generating AI summaries of products
  * Uses OpenAI GPT-4o-mini via Supabase Edge Function
+ * @param {Object} productData - Product data to summarize
+ * @param {boolean} shouldFetch - Whether to fetch the summary (e.g., when dialog is open)
  */
-export function useProductSummary(productData) {
+export function useProductSummary(productData, shouldFetch = false) {
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!productData) {
+    if (!productData || !shouldFetch) {
       return;
     }
 
@@ -68,7 +70,7 @@ export function useProductSummary(productData) {
     };
 
     fetchSummary();
-  }, [productData]);
+  }, [productData, shouldFetch]);
 
   return {
     summary,

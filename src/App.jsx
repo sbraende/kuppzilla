@@ -3,6 +3,7 @@ import { useDebounce } from "use-debounce";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ProductGrid from "@/components/products/ProductGrid";
+import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import { useOffers } from "@/hooks/useOffers";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -88,6 +89,7 @@ function App() {
         )}
       </main>
       <Footer />
+      <ScrollToTop />
     </>
   );
 }
