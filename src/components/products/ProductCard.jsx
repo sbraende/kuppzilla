@@ -37,7 +37,7 @@ function ProductCard({ product, onSave, isSaved }) {
         {/* Discount Badge - Top Left */}
         {hasDiscount && (
           <div className="absolute left-2 top-2 rounded-md bg-yellow-500 px-2 py-1 text-xs font-bold text-white shadow-lg">
-            -{product.discount}%
+            -{Math.round(product.discount)}%
           </div>
         )}
 
