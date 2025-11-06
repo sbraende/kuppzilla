@@ -48,9 +48,7 @@ function Header({
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-9 pr-12"
             />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <AIBadge />
-            </div>
+            <AIBadge className="absolute right-3 top-1/2 -translate-y-1/2" />
           </div>
         </div>
       </div>
