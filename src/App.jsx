@@ -19,6 +19,11 @@ function App() {
   const { products, loading, error, hasMore, loadMore, loadingMore } =
     useOffers(debouncedSearchQuery);
 
+  // Reset function to clear search and return to initial offers
+  const handleReset = () => {
+    setSearchQuery("");
+  };
+
   return (
     <>
       <Header
@@ -28,6 +33,7 @@ function App() {
         onToggleNotification={toggleNotification}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        onReset={handleReset}
       />
       <main className="container mx-auto px-4 py-8">
         {loading && (

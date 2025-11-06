@@ -9,6 +9,7 @@ function Header({
   onToggleNotification,
   searchQuery = "",
   onSearchChange,
+  onReset,
 }) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background">
@@ -18,8 +19,13 @@ function Header({
           {/* Left spacer for centering */}
           <div className="w-10"></div>
 
-          {/* Centered title */}
-          <h1 className="text-2xl font-bold tracking-wider">KUPPZILLA ✨</h1>
+          {/* Centered title - clickable to reset */}
+          <button
+            onClick={onReset}
+            className="text-2xl font-bold tracking-wider hover:opacity-80 transition-opacity cursor-pointer"
+          >
+            KUPPZILLA ✨
+          </button>
 
           {/* Right side with favorites sheet */}
           <FavoritesSheet
