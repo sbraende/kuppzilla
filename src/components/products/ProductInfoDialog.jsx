@@ -17,12 +17,26 @@ import { AIBadge } from "@/components/ui/ai-badge";
 import { useProductStores } from "@/hooks/useProductStores";
 import { useProductQA } from "@/hooks/useProductQA";
 import { useProductSummary } from "@/hooks/useProductSummary";
-import { MessageCircle, Store, ExternalLink, Loader2, Sparkles } from "lucide-react";
+import {
+  MessageCircle,
+  Store,
+  ExternalLink,
+  Loader2,
+  BookOpen,
+} from "lucide-react";
 
 function ProductInfoDialog({ product, open, onOpenChange, children }) {
   const [question, setQuestion] = useState("");
-  const { stores, loading: storesLoading } = useProductStores(product?.productId);
-  const { answer, loading: qaLoading, error: qaError, askQuestion, clearAnswer } = useProductQA();
+  const { stores, loading: storesLoading } = useProductStores(
+    product?.productId
+  );
+  const {
+    answer,
+    loading: qaLoading,
+    error: qaError,
+    askQuestion,
+    clearAnswer,
+  } = useProductQA();
   const { summary, loading: summaryLoading } = useProductSummary(product);
 
   const handleAskQuestion = (e) => {
@@ -67,18 +81,22 @@ function ProductInfoDialog({ product, open, onOpenChange, children }) {
         {/* AI Summary Section */}
         <div className="py-4 border-t">
           <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="h-5 w-5 text-purple-500" />
+            <BookOpen className="h-5 w-5" />
             <h3 className="font-semibold">Produktsammendrag</h3>
             <AIBadge />
           </div>
           {summaryLoading ? (
             <div className="flex items-center gap-2 py-2">
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Genererer sammendrag...</p>
+              <p className="text-sm text-muted-foreground">
+                Genererer sammendrag...
+              </p>
             </div>
           ) : (
             <DialogDescription className="text-base leading-relaxed">
-              {summary || product?.description || "Ingen beskrivelse tilgjengelig"}
+              {summary ||
+                product?.description ||
+                "Ingen beskrivelse tilgjengelig"}
             </DialogDescription>
           )}
 
@@ -170,7 +188,7 @@ function ProductInfoDialog({ product, open, onOpenChange, children }) {
                 return (
                   <div
                     key={`${store.store_name}-${index}`}
-                    className={`p-4 rounded-lg border transition-colors ${
+                    className={`p-3 sm:p-4 rounded-lg border transition-colors ${
                       isCurrentStore
                         ? "border-primary bg-primary/5"
                         : isCheapest
@@ -178,42 +196,47 @@ function ProductInfoDialog({ product, open, onOpenChange, children }) {
                         : "border-border hover:border-muted-foreground"
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{store.store_name}</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        {/* Store name and badges */}
+                        <div className="flex items-center gap-2 flex-wrap mb-2">
+                          <p className="font-medium text-sm sm:text-base">
+                            {store.store_name}
+                          </p>
                           {isCurrentStore && (
-                            <span className="text-xs px-2 py-1 bg-primary text-primary-foreground rounded">
+                            <span className="text-xs px-2 py-0.5 bg-primary text-primary-foreground rounded whitespace-nowrap">
                               Valgt butikk
                             </span>
                           )}
                           {isCheapest && !isCurrentStore && (
-                            <span className="text-xs px-2 py-1 bg-green-500 text-white rounded">
+                            <span className="text-xs px-2 py-0.5 bg-green-500 text-white rounded whitespace-nowrap">
                               Billigst
                             </span>
                           )}
                         </div>
 
-                        <div className="flex items-baseline gap-2 mt-1">
+                        {/* Price section */}
+                        <div className="flex items-baseline gap-2 flex-wrap">
                           {hasDiscount ? (
                             <>
-                              <span className="text-lg font-bold text-foreground">
+                              <span className="text-lg sm:text-xl font-bold text-foreground">
                                 {store.sale_price} kr
                               </span>
                               <span className="text-sm text-muted-foreground line-through">
                                 {store.price} kr
                               </span>
-                              <span className="text-xs px-1.5 py-0.5 bg-destructive text-destructive-foreground rounded">
+                              <span className="text-xs px-1.5 py-0.5 bg-destructive text-destructive-foreground rounded whitespace-nowrap">
                                 -{store.discount_percentage.toFixed(0)}%
                               </span>
                             </>
                           ) : (
-                            <span className="text-lg font-bold text-foreground">
+                            <span className="text-lg sm:text-xl font-bold text-foreground">
                               {store.effective_price} kr
                             </span>
                           )}
                         </div>
 
+                        {/* Availability */}
                         {store.availability && (
                           <p className="text-xs text-muted-foreground mt-1">
                             {store.availability}
@@ -221,12 +244,13 @@ function ProductInfoDialog({ product, open, onOpenChange, children }) {
                         )}
                       </div>
 
+                      {/* Button - full width on mobile, auto on desktop */}
                       {store.link && (
                         <a
                           href={store.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors flex items-center gap-2 text-sm font-medium"
+                          className="w-full sm:w-auto px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors flex items-center justify-center gap-2 text-sm font-medium whitespace-nowrap"
                           onClick={(e) => e.stopPropagation()}
                         >
                           Gå til butikk
