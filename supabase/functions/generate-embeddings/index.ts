@@ -1,16 +1,22 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
+
+// Initialize the AI model session once (reused across requests)
+const model = new Supabase.ai.Session('gte-small')
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders
+    })
   }
 
   try {
@@ -19,16 +25,26 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { batchSize = 10 } = await req.json()
+    const body = await req.json()
+    const { batchSize = 10, text, singleQuery = false } = body
 
-    // Initialize embedding model (gte-small from Supabase)
-    console.log('Loading embedding model...')
-    const generateEmbedding = await pipeline(
-      'feature-extraction',
-      'Supabase/gte-small'
-    )
+    // If this is a single query request (for semantic search)
+    if (singleQuery && text) {
+      console.log(`Generating embedding for single query: "${text}"`)
+      const embedding = await model.run(text, {
+        mean_pool: true,
+        normalize: true,
+      })
 
-    // Get products without embeddings
+      return new Response(
+        JSON.stringify({ embedding }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Batch mode - get products without embeddings
+    console.log(`Fetching up to ${batchSize} products without embeddings...`)
+
     const { data: products, error: fetchError } = await supabase
       .from('products')
       .select('id, title, description, brand')
@@ -55,24 +71,21 @@ serve(async (req) => {
     const updates = []
     for (const product of products) {
       // Combine title, description, and brand for better semantic understanding
-      const text = [
+      const productText = [
         product.title,
         product.description,
         product.brand
       ].filter(Boolean).join(' ')
 
-      // Generate embedding
-      const output = await generateEmbedding(text, {
-        pooling: 'mean',
-        normalize: true
+      // Generate embedding using Supabase AI
+      const embedding = await model.run(productText, {
+        mean_pool: true,
+        normalize: true,
       })
-
-      // Convert to array format expected by pgvector
-      const embedding = Array.from(output.data)
 
       updates.push({
         id: product.id,
-        embedding: embedding,
+        embedding: JSON.stringify(Array.from(embedding)),
         embedding_generated_at: new Date().toISOString()
       })
     }

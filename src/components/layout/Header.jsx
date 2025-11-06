@@ -59,7 +59,7 @@ function Header({
             }`}
           >
             <Sparkles className="h-3 w-3" />
-            {useSemanticSearch ? "AI-søk aktivert" : "Bruk AI-søk"}
+            Bruk AI-søk
           </button>
         </div>
       </div>
