@@ -2,14 +2,12 @@ import { useState, useMemo, useEffect } from "react";
 import { useDebounce } from "use-debounce";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import FilterBar from "@/components/products/FilterBar";
 import ProductGrid from "@/components/products/ProductGrid";
-import { useProducts } from "@/hooks/useProducts";
+import { useOffers } from "@/hooks/useOffers";
 import deals from "@/data/deals";
-import { supabase } from "./lib/supabase";
 
 function App() {
-  const { products, loading, error } = useProducts();
+  const { products, loading, error, hasMore, loadMore, loadingMore } = useOffers();
   const [favoritesList, setFavoritesList] = useState(() => {
     const saved = localStorage.getItem("favoritesList");
     return saved ? JSON.parse(saved) : [];
@@ -18,7 +16,6 @@ function App() {
     const saved = localStorage.getItem("notificationIds");
     return saved ? JSON.parse(saved) : [];
   });
-  const [activeFilter, setActiveFilter] = useState("best-deals");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
 
@@ -29,6 +26,18 @@ function App() {
   useEffect(() => {
     localStorage.setItem("notificationIds", JSON.stringify(notificationIds));
   }, [notificationIds]);
+
+  // Cache Supabase offers in localStorage with 1 hour expiry
+  useEffect(() => {
+    if (products && products.length > 0) {
+      const cacheData = {
+        products,
+        timestamp: Date.now(),
+        expiresIn: 60 * 60 * 1000, // 1 hour
+      };
+      localStorage.setItem("cachedOffers", JSON.stringify(cacheData));
+    }
+  }, [products]);
 
   const handleSaveProduct = (product) => {
     setFavoritesList((prev) => {
@@ -51,24 +60,8 @@ function App() {
 
   const savedProductIds = favoritesList.map((product) => product.id);
 
-  // Extract available categories from products
-  const availableCategories = useMemo(() => {
-    const categoriesSet = new Set();
-    products.forEach((product) => {
-      if (product.categories) {
-        product.categories.forEach((cat) => categoriesSet.add(cat));
-      }
-    });
-    return Array.from(categoriesSet).sort();
-  }, [products]);
-
-  // Calculate relevancy score for a deal based on search query and active filter
-  const calculateDealRelevancy = (
-    deal,
-    searchQuery,
-    filterType,
-    filterCategory
-  ) => {
+  // Calculate relevancy score for a deal based on search query
+  const calculateDealRelevancy = (deal, searchQuery) => {
     let score = deal.featured ? 100 : 50; // Base score
 
     // If there's a search query, boost relevancy if deal matches
@@ -81,15 +74,6 @@ function App() {
         score += 40;
     }
 
-    // If there's a category filter, boost relevancy if deal matches
-    if (filterType === "category" && filterCategory) {
-      if (deal.categories.includes(filterCategory)) {
-        score += 80;
-      } else {
-        score = 0; // Don't show deals from other categories
-      }
-    }
-
     // Add discount value to score
     score += deal.discountValue || 0;
 
@@ -100,27 +84,6 @@ function App() {
   const filteredItems = useMemo(() => {
     let filteredProducts = [...products];
     let filteredDeals = [...deals];
-
-    // Determine filter type
-    const isCategory = activeFilter.startsWith("category-");
-    const categoryName = isCategory
-      ? activeFilter.replace("category-", "")
-      : null;
-
-    // Apply category filter to products
-    if (isCategory && categoryName) {
-      filteredProducts = filteredProducts.filter(
-        (product) =>
-          product.categories && product.categories.includes(categoryName)
-      );
-    }
-
-    // Apply category filter to deals
-    if (isCategory && categoryName) {
-      filteredDeals = filteredDeals.filter(
-        (deal) => deal.categories && deal.categories.includes(categoryName)
-      );
-    }
 
     // Apply search query to products
     if (debouncedSearchQuery.trim()) {
@@ -148,60 +111,26 @@ function App() {
     const dealsWithRelevancy = filteredDeals
       .map((deal) => ({
         ...deal,
-        relevancyScore: calculateDealRelevancy(
-          deal,
-          debouncedSearchQuery,
-          isCategory ? "category" : activeFilter,
-          categoryName
-        ),
+        relevancyScore: calculateDealRelevancy(deal, debouncedSearchQuery),
       }))
       .filter((deal) => deal.relevancyScore > 0);
 
-    // Add type to products for identification
-    const productsWithType = filteredProducts.map((product) => ({
-      ...product,
-      type: "product",
-    }));
+    // Mix deals with products (products already have type: 'product')
+    const mixed = [...filteredProducts, ...dealsWithRelevancy];
 
-    // Mix deals with products
-    const mixed = [...productsWithType, ...dealsWithRelevancy];
-
-    // Sort based on active filter
-    if (activeFilter === "best-deals") {
-      // Sort by discount/relevancy
-      mixed.sort((a, b) => {
-        if (a.type === "deal" && b.type === "deal") {
-          return b.relevancyScore - a.relevancyScore;
-        }
-        if (a.type === "deal") return (b.discount || 0) - a.relevancyScore;
-        if (b.type === "deal") return b.relevancyScore - (a.discount || 0);
-        return (b.discount || 0) - (a.discount || 0);
-      });
-    } else if (activeFilter === "most-popular") {
-      // Sort by some popularity metric (for now, just discount)
-      mixed.sort(
-        (a, b) =>
-          (b.discount || b.relevancyScore || 0) -
-          (a.discount || a.relevancyScore || 0)
-      );
-    } else if (isCategory) {
-      // For category filters, mix deals and products by relevancy/discount
-      mixed.sort((a, b) => {
-        const aScore = a.type === "deal" ? a.relevancyScore : a.discount || 0;
-        const bScore = b.type === "deal" ? b.relevancyScore : b.discount || 0;
-        return bScore - aScore;
-      });
-    } else {
-      // Default: sort by discount
-      mixed.sort((a, b) => {
-        const aScore = a.type === "deal" ? a.relevancyScore : a.discount || 0;
-        const bScore = b.type === "deal" ? b.relevancyScore : b.discount || 0;
-        return bScore - aScore;
-      });
-    }
+    // Sort by savings (for products) or relevancy (for deals)
+    mixed.sort((a, b) => {
+      if (a.type === "deal" && b.type === "deal") {
+        return b.relevancyScore - a.relevancyScore;
+      }
+      if (a.type === "deal") return b.relevancyScore - (a.savings || a.discount || 0);
+      if (b.type === "deal") return (b.savings || b.discount || 0) - a.relevancyScore;
+      // Both products: sort by savings first, then discount
+      return (b.savings || b.discount || 0) - (a.savings || a.discount || 0);
+    });
 
     return mixed;
-  }, [products, debouncedSearchQuery, activeFilter]);
+  }, [products, debouncedSearchQuery]);
 
   return (
     <>
@@ -212,11 +141,6 @@ function App() {
         onToggleNotification={handleToggleNotification}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-      />
-      <FilterBar
-        activeFilter={activeFilter}
-        onFilterChange={setActiveFilter}
-        availableCategories={availableCategories}
       />
       <main className="container mx-auto px-4 py-8">
         {loading && (
@@ -246,6 +170,9 @@ function App() {
             items={filteredItems}
             onSaveProduct={handleSaveProduct}
             savedProductIds={savedProductIds}
+            onLoadMore={loadMore}
+            hasMore={hasMore}
+            loadingMore={loadingMore}
           />
         )}
 
