@@ -1,7 +1,11 @@
-import { Heart } from "lucide-react";
+import { useState } from "react";
+import { Heart, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ProductInfoDialog from "@/components/products/ProductInfoDialog";
+import { DialogTrigger } from "@/components/ui/dialog";
 
 function ProductCard({ product, onSave, isSaved }) {
+  const [dialogOpen, setDialogOpen] = useState(false);
   const hasDiscount = product.discount > 0;
   const displayPrice = product.salePrice || product.price;
 
@@ -11,13 +15,20 @@ function ProductCard({ product, onSave, isSaved }) {
     onSave(product);
   };
 
+  const handleInfoClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDialogOpen(true);
+  };
+
   return (
-    <a
-      href={product.link}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group relative block overflow-hidden rounded-lg bg-card shadow-md transition-all hover:shadow-xl"
-    >
+    <ProductInfoDialog product={product} open={dialogOpen} onOpenChange={setDialogOpen}>
+      <a
+        href={product.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group relative block overflow-hidden rounded-lg bg-card shadow-md transition-all hover:shadow-xl"
+      >
       {/* Product Image */}
       <div className="relative">
         {product.image && (
@@ -40,6 +51,20 @@ function ProductCard({ product, onSave, isSaved }) {
             -{Math.round(product.discount)}%
           </div>
         )}
+
+        {/* Info Button - Top Left (below discount or in place) */}
+        <button
+          onClick={handleInfoClick}
+          className={cn(
+            "absolute rounded-full p-2 shadow-lg transition-all",
+            "hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+            "bg-background/90 text-foreground hover:bg-background",
+            hasDiscount ? "left-2 top-14" : "left-2 top-2"
+          )}
+          aria-label="Produktinformasjon"
+        >
+          <Info className="h-5 w-5" />
+        </button>
 
         {/* Save Button - Top Right */}
         <button
@@ -97,7 +122,8 @@ function ProductCard({ product, onSave, isSaved }) {
           </div>
         )}
       </div>
-    </a>
+      </a>
+    </ProductInfoDialog>
   );
 }
 
