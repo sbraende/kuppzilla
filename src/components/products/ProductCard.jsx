@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, Info } from "lucide-react";
+import { Heart, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ProductInfoDialog from "@/components/products/ProductInfoDialog";
 import { DialogTrigger } from "@/components/ui/dialog";
@@ -15,19 +15,24 @@ function ProductCard({ product, onSave, isSaved }) {
     onSave(product);
   };
 
-  const handleInfoClick = (e) => {
+  const handleExternalLinkClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    // Open external link in new tab
+    if (product.link) {
+      window.open(product.link, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleCardClick = () => {
     setDialogOpen(true);
   };
 
   return (
     <ProductInfoDialog product={product} open={dialogOpen} onOpenChange={setDialogOpen}>
-      <a
-        href={product.link}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group relative block overflow-hidden rounded-lg bg-card shadow-md transition-all hover:shadow-xl"
+      <div
+        onClick={handleCardClick}
+        className="group relative block overflow-hidden rounded-lg bg-card shadow-md transition-all hover:shadow-xl cursor-pointer"
       >
       {/* Product Image */}
       <div className="relative">
@@ -67,17 +72,17 @@ function ProductCard({ product, onSave, isSaved }) {
           <Heart className={cn("h-5 w-5", isSaved && "fill-current")} />
         </button>
 
-        {/* Info Button - Below Save Button (Top Right) */}
+        {/* External Link Button - Below Save Button (Top Right) */}
         <button
-          onClick={handleInfoClick}
+          onClick={handleExternalLinkClick}
           className={cn(
             "absolute right-2 top-14 rounded-full p-2 shadow-lg transition-all",
             "hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
             "bg-background/90 text-foreground hover:bg-background"
           )}
-          aria-label="Produktinformasjon"
+          aria-label="Gå til butikk"
         >
-          <Info className="h-5 w-5" />
+          <ExternalLink className="h-5 w-5" />
         </button>
       </div>
 
@@ -121,7 +126,7 @@ function ProductCard({ product, onSave, isSaved }) {
           </div>
         )}
       </div>
-      </a>
+      </div>
     </ProductInfoDialog>
   );
 }
