@@ -1,5 +1,6 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { AIBadge } from "@/components/ui/ai-badge";
 import FavoritesSheet from "@/components/layout/FavoritesSheet";
 
 function Header({
@@ -45,8 +46,11 @@ function Header({
               placeholder="prøv: 'beste smartklokke til trening...'"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-9"
+              className="pl-9 pr-12"
             />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <AIBadge />
+            </div>
           </div>
         </div>
       </div>
