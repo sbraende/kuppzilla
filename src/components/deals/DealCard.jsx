@@ -4,7 +4,11 @@ import { cn } from "@/lib/utils";
 function DealCard({ deal, onSave, isSaved }) {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' });
+    return date.toLocaleDateString("nb-NO", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
   };
 
   const handleSaveClick = (e) => {
@@ -18,7 +22,7 @@ function DealCard({ deal, onSave, isSaved }) {
       href={deal.link}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative block overflow-hidden rounded-lg bg-gradient-to-br from-yellow-500/10 to-orange-500/10 shadow-md transition-all hover:shadow-xl border-2 border-yellow-500/20 hover:border-yellow-500/40"
+      className="group relative block overflow-hidden rounded-lg bg-linear-to-br from-yellow-500/10 to-orange-500/10 shadow-md transition-all hover:shadow-xl border-2 border-yellow-500/20 hover:border-yellow-500/40"
     >
       {/* Deal Image */}
       <div className="relative">
@@ -31,7 +35,7 @@ function DealCard({ deal, onSave, isSaved }) {
           />
         )}
         {!deal.image && (
-          <div className="flex h-48 w-full items-center justify-center bg-gradient-to-br from-yellow-100 to-orange-100 text-yellow-800">
+          <div className="flex h-48 w-full items-center justify-center bg-linear-to-br from-yellow-100 to-orange-100 text-yellow-800">
             <Sparkles className="h-12 w-12" />
           </div>
         )}
@@ -53,13 +57,15 @@ function DealCard({ deal, onSave, isSaved }) {
               ? "bg-primary text-primary-foreground"
               : "bg-background/90 text-foreground hover:bg-background"
           )}
-          aria-label={isSaved ? "Fjern fra favoritter" : "Legg til i favoritter"}
+          aria-label={
+            isSaved ? "Fjern fra favoritter" : "Legg til i favoritter"
+          }
         >
           <Heart className={cn("h-5 w-5", isSaved && "fill-current")} />
         </button>
 
         {/* KUPP Badge - Bottom Left */}
-        <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-md bg-gradient-to-r from-yellow-500 to-orange-500 px-3 py-1.5 text-xs font-bold text-white shadow-lg">
+        <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-md bg-linear-to-r from-yellow-500 to-orange-500 px-3 py-1.5 text-xs font-bold text-white shadow-lg">
           <Sparkles className="h-3 w-3" />
           <span>KUPP</span>
         </div>

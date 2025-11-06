@@ -6,6 +6,7 @@ import FilterBar from "@/components/products/FilterBar";
 import ProductGrid from "@/components/products/ProductGrid";
 import { useProducts } from "@/hooks/useProducts";
 import deals from "@/data/deals";
+import { supabase } from "./lib/supabase";
 
 function App() {
   const { products, loading, error } = useProducts();

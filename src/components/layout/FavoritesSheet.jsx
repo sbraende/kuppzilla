@@ -72,8 +72,7 @@ function FavoritesSheet({
                 : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
             )}
           >
-            Kupp ({favoritesList.filter((item) => item.type === "deal").length}
-            )
+            Kupp ({favoritesList.filter((item) => item.type === "deal").length})
           </button>
           <button
             onClick={() => setFavoritesFilter("products")}
@@ -109,7 +108,7 @@ function FavoritesSheet({
                   className={cn(
                     "flex gap-3 rounded-lg border p-3 transition-all hover:shadow-md",
                     item.type === "deal"
-                      ? "border-yellow-500/20 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 hover:border-yellow-500/40"
+                      ? "border-yellow-500/20 bg-linear-to-br from-yellow-500/10 to-orange-500/10 hover:border-yellow-500/40"
                       : "border-border bg-card hover:bg-accent/50"
                   )}
                 >
