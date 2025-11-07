@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ScrollText, Heart, X, Bell, BellOff } from "lucide-react";
 import {
   Sheet,
@@ -17,13 +17,21 @@ function FavoritesSheet({
 }) {
   const [favoritesFilter, setFavoritesFilter] = useState("all");
 
-  // Filter favorites items based on selected filter
-  const filteredFavorites = favoritesList.filter((item) => {
-    if (favoritesFilter === "all") return true;
-    if (favoritesFilter === "deals") return item.type === "deal";
-    if (favoritesFilter === "products") return item.type !== "deal";
-    return true;
-  });
+  const counts = useMemo(() => {
+    const deals = favoritesList.filter((item) => item.type === "deal").length;
+    return {
+      all: favoritesList.length,
+      deals,
+      products: favoritesList.length - deals,
+    };
+  }, [favoritesList]);
+
+  const filteredFavorites = useMemo(() => {
+    if (favoritesFilter === "all") return favoritesList;
+    if (favoritesFilter === "deals")
+      return favoritesList.filter((item) => item.type === "deal");
+    return favoritesList.filter((item) => item.type !== "deal");
+  }, [favoritesList, favoritesFilter]);
 
   return (
     <Sheet>
@@ -61,7 +69,7 @@ function FavoritesSheet({
                 : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
             )}
           >
-            Alle ({favoritesList.length})
+            Alle ({counts.all})
           </button>
           <button
             onClick={() => setFavoritesFilter("deals")}
@@ -72,7 +80,7 @@ function FavoritesSheet({
                 : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
             )}
           >
-            Kupp ({favoritesList.filter((item) => item.type === "deal").length})
+            Kupp ({counts.deals})
           </button>
           <button
             onClick={() => setFavoritesFilter("products")}
@@ -83,8 +91,7 @@ function FavoritesSheet({
                 : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
             )}
           >
-            Produkter (
-            {favoritesList.filter((item) => item.type !== "deal").length})
+            Produkter ({counts.products})
           </button>
         </div>
 

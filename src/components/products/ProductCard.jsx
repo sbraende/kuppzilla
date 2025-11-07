@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Heart, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ProductInfoDialog from "@/components/products/ProductInfoDialog";
-import { DialogTrigger } from "@/components/ui/dialog";
 
 function ProductCard({ product, onSave, isSaved }) {
   const [dialogOpen, setDialogOpen] = useState(false);

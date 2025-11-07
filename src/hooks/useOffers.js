@@ -18,8 +18,6 @@ export function useOffers(searchQuery = "") {
 
   // Perform semantic search via Edge Function
   const performSemanticSearch = async (query) => {
-    console.log(`Performing semantic search for: "${query}"`);
-
     const response = await fetch(
       `${SUPABASE_URL}/functions/v1/semantic-search`,
       {
@@ -53,7 +51,6 @@ export function useOffers(searchQuery = "") {
   ) => {
     // Prevent duplicate fetches
     if (isFetchingRef.current) {
-      console.log("Fetch already in progress, skipping...");
       return;
     }
 
@@ -66,15 +63,10 @@ export function useOffers(searchQuery = "") {
         setLoading(true);
       }
 
-      console.log(
-        `Fetching offers with offset: ${currentOffset}, append: ${append}, search: "${search}"`
-      );
-
       // Always try semantic search first if there's a search query
       if (search && search.trim().length > 0) {
         // SEARCH MODE: Max 50 results, no pagination
         if (currentOffset > 0) {
-          console.log("Search mode: pagination disabled, maximum 50 results shown");
           setHasMore(false);
           setLoading(false);
           setLoadingMore(false);
@@ -83,21 +75,18 @@ export function useOffers(searchQuery = "") {
         }
 
         try {
-          console.log("Search mode: attempting semantic search with combined scoring...");
           const semanticResults = await performSemanticSearch(search);
           const mappedProducts = mapOffersToProducts(semanticResults);
 
           setProducts(mappedProducts);
           setHasMore(false); // Search mode: no pagination, max 50 results
           setError(null);
-          console.log(`Search mode: loaded ${mappedProducts.length} products (max 50)`);
 
           setLoading(false);
           setLoadingMore(false);
           isFetchingRef.current = false;
           return;
-        } catch (semanticError) {
-          console.warn("Semantic search failed, falling back to regular search:", semanticError);
+        } catch {
           // Continue to regular search below
         }
       }
@@ -114,7 +103,6 @@ export function useOffers(searchQuery = "") {
 
       if (queryError) {
         // Fallback to direct view query if function doesn't exist
-        console.warn("RPC function not found, using fallback query");
         const fallbackData = await fetchOffersWithFallback(currentOffset);
 
         if (fallbackData.error) throw fallbackData.error;
@@ -128,23 +116,13 @@ export function useOffers(searchQuery = "") {
         }
 
         setHasMore(fallbackData.data.length === ITEMS_PER_PAGE);
-        console.log(
-          `Loaded ${mappedProducts.length} products, hasMore: ${
-            fallbackData.data.length === ITEMS_PER_PAGE
-          }`
-        );
         return;
       }
 
       const mappedProducts = mapOffersToProducts(data);
 
       if (append) {
-        setProducts((prev) => {
-          console.log(
-            `Appending ${mappedProducts.length} products to existing ${prev.length}`
-          );
-          return [...prev, ...mappedProducts];
-        });
+        setProducts((prev) => [...prev, ...mappedProducts]);
       } else {
         setProducts(mappedProducts);
       }
@@ -152,11 +130,7 @@ export function useOffers(searchQuery = "") {
       const hasMoreData = data && data.length === ITEMS_PER_PAGE;
       setHasMore(hasMoreData);
       setError(null);
-      console.log(
-        `Loaded ${mappedProducts.length} products, hasMore: ${hasMoreData}`
-      );
     } catch (err) {
-      console.error("Error fetching offers:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -234,25 +208,20 @@ export function useOffers(searchQuery = "") {
       merchant: offer.sale_store || offer.store_name || "",
       type: "product",
       availability: offer.availability || "",
-      categories: [], // Can be populated if needed
-      productType: "",
-      gtin: offer.gtin || "", // Global Trade Item Number for enhanced AI context
-      // Extra fields for "best offer" display
+      gtin: offer.gtin || "",
       savings: parseFloat(offer.savings || 0),
       savingsPercentage: parseFloat(offer.savings_percentage || 0),
       minOtherStorePrice: parseFloat(
         offer.min_other_store_price || offer.min_other_price || 0
       ),
-      isBestOffer: offer.is_best_offer || false, // NEW: flag to show "Best Offer" badge
+      isBestOffer: offer.is_best_offer || false,
     }));
   }
 
   // Load more function for infinite scroll
   const loadMore = useCallback(() => {
-    console.log("loadMore called", { loadingMore, hasMore, offset });
     if (!loadingMore && hasMore) {
       const newOffset = offset + ITEMS_PER_PAGE;
-      console.log(`Setting new offset: ${newOffset}`);
       setOffset(newOffset);
       fetchOffers(newOffset, true, searchQuery);
     }
@@ -261,7 +230,6 @@ export function useOffers(searchQuery = "") {
   // Initial fetch
   useEffect(() => {
     if (!hasFetchedInitialRef.current) {
-      console.log("Initial fetch triggered");
       hasFetchedInitialRef.current = true;
       fetchOffers(0, false, searchQuery);
     }
@@ -278,9 +246,6 @@ export function useOffers(searchQuery = "") {
     const searchChanged = previousSearchRef.current !== searchQuery;
 
     if (searchChanged) {
-      console.log(
-        `Search changed from "${previousSearchRef.current}" to "${searchQuery}"`
-      );
       previousSearchRef.current = searchQuery;
 
       // Reset pagination and fetch new results

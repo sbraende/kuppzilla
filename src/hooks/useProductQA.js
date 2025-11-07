@@ -31,8 +31,6 @@ export function useProductQA() {
     setAnswer(""); // Clear previous answer
 
     try {
-      console.log(`Asking question: "${question}"`);
-
       const response = await fetch(
         `${SUPABASE_URL}/functions/v1/product-qa`,
         {
@@ -66,14 +64,11 @@ export function useProductQA() {
 
       const data = await response.json();
 
-      console.log(`Received answer: ${data.answer.substring(0, 100)}...`);
       setAnswer(data.answer);
     } catch (err) {
       if (err.name === "AbortError") {
-        console.log("Request was cancelled");
         return;
       }
-      console.error("Product Q&A error:", err);
       setError(err.message);
     } finally {
       setLoading(false);

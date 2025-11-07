@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
+import { Toaster } from "sonner";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ProductGrid from "@/components/products/ProductGrid";
@@ -12,15 +13,12 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
 
-  // Custom hooks for localStorage management
   const { favoritesList, savedProductIds, toggleFavorite } = useFavorites();
   const { notificationIds, toggleNotification } = useNotifications();
 
-  // Pass debounced search query to useOffers (semantic search is always used)
   const { products, loading, error, hasMore, loadMore, loadingMore } =
     useOffers(debouncedSearchQuery);
 
-  // Reset function to clear search and return to initial offers
   const handleReset = () => {
     setSearchQuery("");
   };
@@ -37,7 +35,6 @@ function App() {
         onReset={handleReset}
       />
       <main className="container mx-auto px-4 py-8">
-        {/* Subtitle for browse mode */}
         {!debouncedSearchQuery && (
           <div className="text-center mb-8">
             <h2 className="text-2xl font-semibold text-foreground">
@@ -90,6 +87,7 @@ function App() {
       </main>
       <Footer />
       <ScrollToTop />
+      <Toaster position="top-center" richColors />
     </>
   );
 }

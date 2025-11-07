@@ -24,8 +24,6 @@ export function useProductSummary(productData, shouldFetch = false) {
       setError(null);
 
       try {
-        console.log(`Fetching AI summary for: ${productData.title}`);
-
         const response = await fetch(
           `${SUPABASE_URL}/functions/v1/product-summary`,
           {
@@ -57,10 +55,8 @@ export function useProductSummary(productData, shouldFetch = false) {
 
         const data = await response.json();
 
-        console.log(`Received summary: ${data.summary.substring(0, 100)}...`);
         setSummary(data.summary);
       } catch (err) {
-        console.error("Product summary error:", err);
         setError(err.message);
         // Fallback to description if AI summary fails
         setSummary(productData.description || "");

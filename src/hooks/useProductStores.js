@@ -23,8 +23,6 @@ export function useProductStores(productId) {
       setError(null);
 
       try {
-        console.log(`Fetching all stores for product: ${productId}`);
-
         const { data, error: queryError } = await supabase
           .from("products_with_stores")
           .select(
@@ -38,10 +36,8 @@ export function useProductStores(productId) {
           throw queryError;
         }
 
-        console.log(`Found ${data?.length || 0} stores selling this product`);
         setStores(data || []);
       } catch (err) {
-        console.error("Error fetching product stores:", err);
         setError(err.message);
         setStores([]);
       } finally {
