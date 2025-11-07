@@ -85,20 +85,20 @@ function ProductInfoDialog({ product, open, onOpenChange, children }) {
             <h3 className="font-semibold">Produktsammendrag</h3>
             <AIBadge />
           </div>
-          {summaryLoading ? (
-            <div className="flex items-center gap-2 py-2">
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
-                Genererer sammendrag...
-              </p>
-            </div>
-          ) : (
-            <DialogDescription className="text-base leading-relaxed">
-              {summary ||
-                product?.description ||
-                "Ingen beskrivelse tilgjengelig"}
-            </DialogDescription>
-          )}
+          <DialogDescription className="text-base leading-relaxed">
+            {summaryLoading ? (
+              <span className="flex items-center gap-2 py-2">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  Genererer sammendrag...
+                </span>
+              </span>
+            ) : (
+              summary ||
+              product?.description ||
+              "Ingen beskrivelse tilgjengelig"
+            )}
+          </DialogDescription>
 
           {/* Original Description in Accordion */}
           {product?.description && (

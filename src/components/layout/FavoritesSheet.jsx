@@ -5,6 +5,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -56,6 +57,11 @@ function FavoritesSheet({
               <span className="text-xl">Favoritter</span>
             </div>
           </SheetTitle>
+          <SheetDescription>
+            {counts.all === 0
+              ? "Ingen favoritter lagret"
+              : `${counts.all} ${counts.all === 1 ? "favoritt" : "favoritter"} lagret`}
+          </SheetDescription>
         </SheetHeader>
 
         {/* Filter Tabs */}
