@@ -196,6 +196,3 @@ Migrates cleaned webshop data to normalized structure:
 4. Run `migrate-webshop-to-normalized.sql` to add to normalized tables
 5. Verify data with the provided SQL queries
 
-## Contributing
-
-This is a case project for VG Lab. See `CLAUDE.md` for detailed development guidelines.
