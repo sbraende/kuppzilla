@@ -28,3 +28,4 @@ dist-ssr
 # AI
 /AGENTS.md
 /CLAUDE.md
+.claude

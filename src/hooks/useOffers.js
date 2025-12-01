@@ -76,16 +76,22 @@ export function useOffers(searchQuery = "") {
 
         try {
           const semanticResults = await performSemanticSearch(search);
-          const mappedProducts = mapOffersToProducts(semanticResults);
 
-          setProducts(mappedProducts);
-          setHasMore(false); // Search mode: no pagination, max 50 results
-          setError(null);
+          // Only use semantic results if we actually found something
+          // Otherwise fall back to regular search
+          if (semanticResults && semanticResults.length > 0) {
+            const mappedProducts = mapOffersToProducts(semanticResults);
 
-          setLoading(false);
-          setLoadingMore(false);
-          isFetchingRef.current = false;
-          return;
+            setProducts(mappedProducts);
+            setHasMore(false); // Search mode: no pagination, max 50 results
+            setError(null);
+
+            setLoading(false);
+            setLoadingMore(false);
+            isFetchingRef.current = false;
+            return;
+          }
+          // Fall through to regular search if no semantic results
         } catch {
           // Continue to regular search below
         }

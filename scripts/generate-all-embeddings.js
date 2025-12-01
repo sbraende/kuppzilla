@@ -5,9 +5,11 @@
  * Usage: node scripts/generate-all-embeddings.js
  */
 
-const SUPABASE_URL = "https://fwmrnajxuulbqegegzah.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3bXJuYWp4dXVsYnFlZ2VnemFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1ODU2MzcsImV4cCI6MjA3OTk0NTYzN30.bs_5_p0-T8CSA-tfWcKPa6yXBDry0lsHyIdeRYvcWMI";
+import dotenv from "dotenv";
+dotenv.config();
+
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_KEY;
 
 const BATCH_SIZE = 10; // Process 10 products at a time
 const DELAY_MS = 2000; // Wait 2 seconds between batches
